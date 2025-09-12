@@ -36,9 +36,7 @@ const validateRegister = [
   
   body('password')
     .isLength({ min: 6, max: 128 })
-    .withMessage('Senha deve ter entre 6 e 128 caracteres')
-    .matches(/^(?=.*[a-zA-Z])(?=.*\d)/)
-    .withMessage('Senha deve conter pelo menos 1 letra e 1 número'),
+    .withMessage('Senha deve ter entre 6 e 128 caracteres'),
   
   body('company')
     .optional()
@@ -48,8 +46,8 @@ const validateRegister = [
   
   body('plan')
     .optional()
-    .isIn(['free', 'basic', 'pro', 'enterprise'])
-    .withMessage('Plano deve ser: free, basic, pro ou enterprise'),
+    .isIn(['free', 'basic', 'premium', 'enterprise'])
+    .withMessage('Plano deve ser: free, basic, premium ou enterprise'),
   
   handleValidationErrors
 ];
@@ -63,52 +61,6 @@ const validateLogin = [
   body('password')
     .notEmpty()
     .withMessage('Senha é obrigatória'),
-  
-  handleValidationErrors
-];
-
-const validateProfileUpdate = [
-  body('name')
-    .optional()
-    .trim()
-    .isLength({ min: 2, max: 100 })
-    .withMessage('Nome deve ter entre 2 e 100 caracteres')
-    .matches(/^[a-zA-ZÀ-ÿ\s]+$/)
-    .withMessage('Nome deve conter apenas letras e espaços'),
-  
-  body('email')
-    .optional()
-    .isEmail()
-    .withMessage('Email deve ter um formato válido')
-    .normalizeEmail()
-    .isLength({ max: 255 })
-    .withMessage('Email muito longo'),
-  
-  body('company')
-    .optional()
-    .trim()
-    .isLength({ max: 200 })
-    .withMessage('Nome da empresa muito longo'),
-  
-  body('phone')
-    .optional()
-    .trim()
-    .matches(/^[\d\s\(\)\+\-]+$/)
-    .withMessage('Telefone deve conter apenas números e caracteres válidos'),
-  
-  handleValidationErrors
-];
-
-const validatePasswordChange = [
-  body('currentPassword')
-    .notEmpty()
-    .withMessage('Senha atual é obrigatória'),
-  
-  body('newPassword')
-    .isLength({ min: 6, max: 128 })
-    .withMessage('Nova senha deve ter entre 6 e 128 caracteres')
-    .matches(/^(?=.*[a-zA-Z])(?=.*\d)/)
-    .withMessage('Nova senha deve conter pelo menos 1 letra e 1 número'),
   
   handleValidationErrors
 ];
@@ -127,18 +79,13 @@ const validateAgent = [
     .withMessage('Descrição muito longa (máximo 500 caracteres)'),
   
   body('ai_provider')
-    .isIn(['chatgpt', 'gemini', 'huggingface', 'claude'])
-    .withMessage('Provedor de IA deve ser: chatgpt, gemini, huggingface ou claude'),
+    .isIn(['chatgpt', 'gemini', 'huggingface'])
+    .withMessage('Provedor de IA deve ser: chatgpt, gemini ou huggingface'),
   
   body('model')
     .trim()
     .isLength({ min: 1, max: 100 })
     .withMessage('Modelo é obrigatório e deve ter no máximo 100 caracteres'),
-  
-  body('api_key')
-    .trim()
-    .isLength({ min: 10, max: 500 })
-    .withMessage('Chave da API deve ter entre 10 e 500 caracteres'),
   
   body('system_prompt')
     .optional()
@@ -159,62 +106,17 @@ const validateAgent = [
   handleValidationErrors
 ];
 
-// Validações para conversas
-const validateConversation = [
-  body('agent_id')
-    .isUUID()
-    .withMessage('ID do agente deve ser um UUID válido'),
-  
-  body('channel_type')
-    .optional()
-    .isIn(['web', 'whatsapp', 'telegram', 'api'])
-    .withMessage('Tipo de canal deve ser: web, whatsapp, telegram ou api'),
-  
-  body('context')
-    .optional()
-    .isObject()
-    .withMessage('Contexto deve ser um objeto JSON válido'),
-  
-  handleValidationErrors
-];
-
-const validateMessage = [
-  body('conversation_id')
-    .isUUID()
-    .withMessage('ID da conversa deve ser um UUID válido'),
-  
-  body('content')
-    .trim()
-    .isLength({ min: 1, max: 5000 })
-    .withMessage('Mensagem deve ter entre 1 e 5000 caracteres'),
-  
-  body('sender_type')
-    .isIn(['user', 'agent'])
-    .withMessage('Tipo do remetente deve ser: user ou agent'),
-  
-  handleValidationErrors
-];
-
-// Validações para parâmetros de URL
-const validateUUID = [
-  param('id')
-    .isUUID()
-    .withMessage('ID deve ser um UUID válido'),
-  
-  handleValidationErrors
-];
-
 // Validações para queries de paginação
 const validatePagination = [
-  query('page')
-    .optional()
-    .isInt({ min: 1, max: 1000 })
-    .withMessage('Página deve ser um número entre 1 e 1000'),
-  
   query('limit')
     .optional()
     .isInt({ min: 1, max: 100 })
     .withMessage('Limite deve ser um número entre 1 e 100'),
+  
+  query('offset')
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage('Offset deve ser um número maior ou igual a 0'),
   
   query('search')
     .optional()
@@ -253,22 +155,15 @@ const apiRateLimit = createRateLimit(
   'Muitas requisições. Tente novamente em 1 minuto.'
 );
 
-const messageRateLimit = createRateLimit(
-  60 * 1000, // 1 minuto
-  30, // 30 mensagens
-  'Muitas mensagens enviadas. Tente novamente em 1 minuto.'
-);
-
 // Sanitização de dados
 const sanitizeInput = (req, res, next) => {
-  // Remove caracteres perigosos de strings
   const sanitizeString = (str) => {
     if (typeof str !== 'string') return str;
     return str
-      .replace(/<script[^>]*>.*?<\/script>/gi, '') // Remove scripts
-      .replace(/<[^>]*>/g, '') // Remove HTML tags
-      .replace(/javascript:/gi, '') // Remove javascript:
-      .replace(/on\w+\s*=/gi, '') // Remove event handlers
+      .replace(/<script[^>]*>.*?<\/script>/gi, '')
+      .replace(/<[^>]*>/g, '')
+      .replace(/javascript:/gi, '')
+      .replace(/on\w+\s*=/gi, '')
       .trim();
   };
 
@@ -303,8 +198,8 @@ const sanitizeInput = (req, res, next) => {
 const errorHandler = (err, req, res, next) => {
   console.error('Error:', err);
 
-  // Erro de validação do Joi ou express-validator
-  if (err.name === 'ValidationError' || err.type === 'validation') {
+  // Erro de validação
+  if (err.name === 'ValidationError') {
     return res.status(400).json({
       success: false,
       message: 'Dados de entrada inválidos',
@@ -335,38 +230,6 @@ const errorHandler = (err, req, res, next) => {
     });
   }
 
-  if (err.code === 'ER_NO_REFERENCED_ROW_2') {
-    return res.status(400).json({
-      success: false,
-      message: 'Referência inválida'
-    });
-  }
-
-  // Erro de rate limit
-  if (err.status === 429) {
-    return res.status(429).json({
-      success: false,
-      message: 'Muitas requisições. Tente novamente mais tarde.',
-      retryAfter: err.retryAfter
-    });
-  }
-
-  // Erro de arquivo muito grande
-  if (err.code === 'LIMIT_FILE_SIZE') {
-    return res.status(413).json({
-      success: false,
-      message: 'Arquivo muito grande'
-    });
-  }
-
-  // Erro de sintaxe JSON
-  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
-    return res.status(400).json({
-      success: false,
-      message: 'JSON inválido'
-    });
-  }
-
   // Erro genérico do servidor
   const statusCode = err.statusCode || err.status || 500;
   const message = process.env.NODE_ENV === 'production' 
@@ -389,26 +252,13 @@ const notFoundHandler = (req, res) => {
 };
 
 module.exports = {
-  // Validações
   validateRegister,
   validateLogin,
-  validateProfileUpdate,
-  validatePasswordChange,
   validateAgent,
-  validateAgentUpdate: validateAgent, // Reutiliza a mesma validação
-  validateConversation,
-  validateMessage,
-  validateUUID,
   validatePagination,
   handleValidationErrors,
-  
-  // Rate limiting
   authRateLimit,
   apiRateLimit,
-  messageRateLimit,
-  createRateLimit,
-  
-  // Sanitização e tratamento de erros
   sanitizeInput,
   errorHandler,
   notFoundHandler

@@ -31,10 +31,6 @@ export const Login: React.FC = () => {
       setError('Senha é obrigatória');
       return false;
     }
-    if (formData.password.length < 6) {
-      setError('Senha deve ter pelo menos 6 caracteres');
-      return false;
-    }
     return true;
   };
 
@@ -49,42 +45,21 @@ export const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      // Para teste: simular login com credenciais de demonstração
-      if (formData.email === 'demo@test.com' && formData.password === '123456') {
-        console.log('Login de demonstração realizado');
-        
-        // Simular resposta de sucesso
-        const mockUser = {
-          id: 1,
-          name: 'Usuário Demo',
-          email: 'demo@test.com',
-          role: 'user',
-          plan: 'premium'
-        };
-        
-        const mockToken = 'demo-token-' + Date.now();
-        
-        localStorage.setItem('token', mockToken);
-        dispatch({ type: 'SET_USER', payload: mockUser });
-        showSuccess('Login realizado com sucesso!', `Bem-vindo, ${mockUser.name}`);
-        navigate('/dashboard');
-        return;
-      }
-      
-      // Tentar login real
       const response = await apiService.login(formData.email, formData.password);
       
       if (response.success) {
-        localStorage.setItem('token', response.token);
-        dispatch({ type: 'SET_USER', payload: response.user });
-        showSuccess('Login realizado com sucesso!', `Bem-vindo, ${response.user.name}`);
+        dispatch({ type: 'SET_USER', payload: response.data.user });
+        showSuccess('Login realizado com sucesso!', `Bem-vindo, ${response.data.user.name}`);
         navigate('/dashboard');
       } else {
-        showError('Erro no login', response.message || 'Credenciais inválidas');
+        setError(response.error || 'Credenciais inválidas');
+        showError('Erro no login', response.error || 'Credenciais inválidas');
       }
     } catch (error: any) {
       console.error('Login error:', error);
-      showError('Erro de conexão', error.message || 'Não foi possível conectar com o servidor');
+      const errorMessage = error.message || 'Não foi possível conectar com o servidor';
+      setError(errorMessage);
+      showError('Erro de conexão', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -95,6 +70,7 @@ export const Login: React.FC = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
+    if (error) setError('');
   };
 
   return (
@@ -177,19 +153,6 @@ export const Login: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <span className="ml-2 text-sm text-gray-600">Lembrar de mim</span>
-              </label>
-              <a href="#" className="text-sm text-blue-600 hover:text-blue-500">
-                Esqueceu a senha?
-              </a>
-            </div>
-
             <button
               type="submit"
               disabled={loading}
@@ -206,21 +169,12 @@ export const Login: React.FC = () => {
             </button>
           </form>
 
-          {/* Credenciais de demonstração para teste */}
-          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <h3 className="text-sm font-medium text-blue-800 mb-2">Credenciais de Teste:</h3>
-            <div className="text-sm text-blue-700">
-              <p><strong>Email:</strong> demo@test.com</p>
-              <p><strong>Senha:</strong> 123456</p>
-            </div>
-          </div>
-
           <div className="mt-6 text-center space-y-4">
             <p className="text-sm text-gray-600">
               Não tem uma conta?{' '}
-              <a href="/register" className="text-blue-600 hover:text-blue-500 font-medium">
+              <Link to="/register" className="text-blue-600 hover:text-blue-500 font-medium">
                 Criar conta
-              </a>
+              </Link>
             </p>
             
             <div className="border-t border-gray-200 pt-4">
@@ -245,7 +199,6 @@ export const Login: React.FC = () => {
           <p className="text-sm text-gray-500">
             © 2025 AI Agents SaaS. Todos os direitos reservados.
           </p>
-
         </div>
       </motion.div>
     </div>

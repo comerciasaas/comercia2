@@ -1,20 +1,20 @@
-const Agent = require('../models/Agent');
+const Conversation = require('../models/Conversation');
 
-const agentController = {
+const conversationController = {
   async create(req, res) {
     try {
-      const agentData = req.body;
+      const conversationData = req.body;
       const userId = req.userId;
 
-      const agent = await Agent.create(userId, agentData);
+      const conversation = await Conversation.create(userId, conversationData);
       
       res.status(201).json({
         success: true,
-        message: 'Agente criado com sucesso',
-        data: { agent }
+        message: 'Conversa criada com sucesso',
+        data: { conversation }
       });
     } catch (error) {
-      console.error('Create agent error:', error);
+      console.error('Create conversation error:', error);
       res.status(500).json({ 
         success: false, 
         error: 'Erro interno do servidor' 
@@ -24,17 +24,23 @@ const agentController = {
 
   async getAll(req, res) {
     try {
-      const { limit = 50, offset = 0 } = req.query;
+      const { limit = 50, offset = 0, status, channel_type, agent_id, search } = req.query;
       const userId = req.userId;
       
-      const agents = await Agent.findByUserId(userId, parseInt(limit), parseInt(offset));
+      const filters = {};
+      if (status) filters.status = status;
+      if (channel_type) filters.channel_type = channel_type;
+      if (agent_id) filters.agent_id = agent_id;
+      if (search) filters.search = search;
+
+      const conversations = await Conversation.findAll(userId, parseInt(limit), parseInt(offset), filters);
 
       res.json({ 
         success: true,
-        data: { agents }
+        data: { conversations }
       });
     } catch (error) {
-      console.error('Get agents error:', error);
+      console.error('Get conversations error:', error);
       res.status(500).json({ 
         success: false, 
         error: 'Erro interno do servidor' 
@@ -47,21 +53,21 @@ const agentController = {
       const { id } = req.params;
       const userId = req.userId;
       
-      const agent = await Agent.findById(userId, id);
+      const conversation = await Conversation.findById(userId, id);
       
-      if (!agent) {
+      if (!conversation) {
         return res.status(404).json({ 
           success: false, 
-          error: 'Agente não encontrado' 
+          error: 'Conversa não encontrada' 
         });
       }
 
       res.json({ 
         success: true,
-        data: { agent }
+        data: { conversation }
       });
     } catch (error) {
-      console.error('Get agent error:', error);
+      console.error('Get conversation error:', error);
       res.status(500).json({ 
         success: false, 
         error: 'Erro interno do servidor' 
@@ -75,22 +81,22 @@ const agentController = {
       const updates = req.body;
       const userId = req.userId;
 
-      const agent = await Agent.update(userId, id, updates);
+      const conversation = await Conversation.update(userId, id, updates);
       
-      if (!agent) {
+      if (!conversation) {
         return res.status(404).json({ 
           success: false, 
-          error: 'Agente não encontrado' 
+          error: 'Conversa não encontrada' 
         });
       }
 
       res.json({
         success: true,
-        message: 'Agente atualizado com sucesso',
-        data: { agent }
+        message: 'Conversa atualizada com sucesso',
+        data: { conversation }
       });
     } catch (error) {
-      console.error('Update agent error:', error);
+      console.error('Update conversation error:', error);
       res.status(500).json({ 
         success: false, 
         error: 'Erro interno do servidor' 
@@ -103,21 +109,21 @@ const agentController = {
       const { id } = req.params;
       const userId = req.userId;
 
-      const success = await Agent.delete(userId, id);
+      const success = await Conversation.delete(userId, id);
       
       if (!success) {
         return res.status(404).json({ 
           success: false, 
-          error: 'Agente não encontrado' 
+          error: 'Conversa não encontrada' 
         });
       }
 
       res.json({ 
         success: true,
-        message: 'Agente excluído com sucesso' 
+        message: 'Conversa excluída com sucesso' 
       });
     } catch (error) {
-      console.error('Delete agent error:', error);
+      console.error('Delete conversation error:', error);
       res.status(500).json({ 
         success: false, 
         error: 'Erro interno do servidor' 
@@ -128,14 +134,14 @@ const agentController = {
   async getStats(req, res) {
     try {
       const userId = req.userId;
-      const stats = await Agent.getStats(userId);
+      const stats = await Conversation.getStats(userId);
       
       res.json({ 
         success: true,
         data: { stats }
       });
     } catch (error) {
-      console.error('Get agent stats error:', error);
+      console.error('Get conversation stats error:', error);
       res.status(500).json({ 
         success: false, 
         error: 'Erro interno do servidor' 
@@ -144,4 +150,4 @@ const agentController = {
   }
 };
 
-module.exports = agentController;
+module.exports = conversationController;

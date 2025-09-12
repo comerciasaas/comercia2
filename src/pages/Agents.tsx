@@ -8,38 +8,34 @@ import {
   PlayIcon,
   PauseIcon,
   ChatBubbleLeftRightIcon,
-  ClockIcon,
-  StarIcon,
   ExclamationTriangleIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { useApp } from '../contexts/AppContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { apiService } from '../services/api';
-import { Agent } from '../types';
 
 interface AgentFormData {
   name: string;
   description: string;
   objective: string;
   personality: 'formal' | 'casual' | 'friendly' | 'professional';
-  aiProvider: 'chatgpt' | 'gemini' | 'huggingface';
+  ai_provider: 'chatgpt' | 'gemini' | 'huggingface';
   model: string;
-  systemPrompt: string;
+  system_prompt: string;
   temperature: number;
-  maxTokens: number;
+  max_tokens: number;
 }
 
 interface AgentFormErrors {
   name?: string;
   description?: string;
   objective?: string;
-  personality?: string;
-  aiProvider?: string;
+  ai_provider?: string;
   model?: string;
-  systemPrompt?: string;
+  system_prompt?: string;
   temperature?: string;
-  maxTokens?: string;
+  max_tokens?: string;
   general?: string;
 }
 
@@ -47,7 +43,6 @@ export const Agents: React.FC = () => {
   const { state, dispatch } = useApp();
   const { showSuccess, showError } = useNotification();
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -57,11 +52,11 @@ export const Agents: React.FC = () => {
     description: '',
     objective: '',
     personality: 'professional',
-    aiProvider: 'chatgpt',
+    ai_provider: 'chatgpt',
     model: 'gpt-3.5-turbo',
-    systemPrompt: '',
+    system_prompt: '',
     temperature: 0.7,
-    maxTokens: 1000,
+    max_tokens: 1000,
   });
   const [formErrors, setFormErrors] = useState<AgentFormErrors>({});
 
@@ -71,132 +66,59 @@ export const Agents: React.FC = () => {
         setLoading(true);
         setError(null);
         
-        // Verificar se há token para decidir entre dados mock ou reais
-        const token = localStorage.getItem('token');
+        const response = await apiService.getAgents();
         
-        if (!token || token.includes('demo')) {
-          console.log('Carregando dados mockados de agentes');
-          
-          // Dados mockados para demonstração
-          const mockAgents = [
-            {
-              id: 1,
-              name: 'Assistente de Vendas',
-              description: 'Agente especializado em vendas e atendimento ao cliente',
-              objective: 'Auxiliar clientes com dúvidas sobre produtos e processos de compra',
-              personality: 'friendly',
-              ai_provider: 'chatgpt',
-              model: 'gpt-3.5-turbo',
-              system_prompt: 'Você é um assistente de vendas amigável e prestativo.',
-              temperature: 0.7,
-              max_tokens: 1000,
-              is_active: true,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-              user_id: 1
-            },
-            {
-              id: 2,
-              name: 'Suporte Técnico',
-              description: 'Agente para resolver problemas técnicos e dúvidas',
-              objective: 'Fornecer suporte técnico especializado aos usuários',
-              personality: 'professional',
-              ai_provider: 'gemini',
-              model: 'gemini-pro',
-              system_prompt: 'Você é um especialista em suporte técnico.',
-              temperature: 0.5,
-              max_tokens: 1500,
-              is_active: false,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-              user_id: 1
-            },
-            {
-              id: 3,
-              name: 'Consultor Financeiro',
-              description: 'Agente para consultoria financeira e investimentos',
-              personality: 'formal',
-              ai_provider: 'chatgpt',
-              model: 'gpt-4',
-              system_prompt: 'Você é um consultor financeiro experiente.',
-              temperature: 0.3,
-              max_tokens: 2000,
-              is_active: true,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-              user_id: 1
-            }
-          ];
-          
-          dispatch({ type: 'SET_AGENTS', payload: mockAgents });
+        if (response.success) {
+          dispatch({ type: 'SET_AGENTS', payload: response.data.agents || [] });
         } else {
-          // Tentar carregar dados reais
-          const agentsData = await apiService.getAgents();
-          dispatch({ type: 'SET_AGENTS', payload: agentsData.agents || [] });
+          throw new Error(response.error || 'Erro ao carregar agentes');
         }
       } catch (error) {
         console.error('Erro ao carregar agentes:', error);
-        setError(error instanceof Error ? error.message : 'Erro ao carregar agentes');
+        const errorMessage = error instanceof Error ? error.message : 'Erro ao carregar agentes';
+        setError(errorMessage);
+        showError('Erro ao carregar agentes', errorMessage);
       } finally {
         setLoading(false);
       }
     };
 
     loadAgents();
-  }, [dispatch]);
+  }, [dispatch, showError]);
 
   const validateForm = (): boolean => {
     const errors: AgentFormErrors = {};
 
-    // Validação do nome
     if (!formData.name.trim()) {
       errors.name = 'Nome é obrigatório';
     } else if (formData.name.length < 2) {
       errors.name = 'Nome deve ter pelo menos 2 caracteres';
-    } else if (formData.name.length > 100) {
-      errors.name = 'Nome deve ter no máximo 100 caracteres';
     }
 
-    // Validação da descrição
     if (!formData.description.trim()) {
       errors.description = 'Descrição é obrigatória';
     } else if (formData.description.length < 10) {
       errors.description = 'Descrição deve ter pelo menos 10 caracteres';
-    } else if (formData.description.length > 500) {
-      errors.description = 'Descrição deve ter no máximo 500 caracteres';
     }
 
-    // Validação do objetivo
     if (!formData.objective.trim()) {
       errors.objective = 'Objetivo é obrigatório';
-    } else if (formData.objective.length < 10) {
-      errors.objective = 'Objetivo deve ter pelo menos 10 caracteres';
-    } else if (formData.objective.length > 1000) {
-      errors.objective = 'Objetivo deve ter no máximo 1000 caracteres';
     }
 
-    // Validação do modelo
     if (!formData.model.trim()) {
       errors.model = 'Modelo é obrigatório';
     }
 
-    // Validação do prompt do sistema
-    if (!formData.systemPrompt.trim()) {
-      errors.systemPrompt = 'Prompt do sistema é obrigatório';
-    } else if (formData.systemPrompt.length < 20) {
-      errors.systemPrompt = 'Prompt deve ter pelo menos 20 caracteres';
-    } else if (formData.systemPrompt.length > 2000) {
-      errors.systemPrompt = 'Prompt deve ter no máximo 2000 caracteres';
+    if (!formData.system_prompt.trim()) {
+      errors.system_prompt = 'Prompt do sistema é obrigatório';
     }
 
-    // Validação da temperatura
     if (formData.temperature < 0 || formData.temperature > 2) {
       errors.temperature = 'Temperatura deve estar entre 0 e 2';
     }
 
-    // Validação dos tokens máximos
-    if (formData.maxTokens < 100 || formData.maxTokens > 4000) {
-      errors.maxTokens = 'Tokens máximos devem estar entre 100 e 4000';
+    if (formData.max_tokens < 100 || formData.max_tokens > 4000) {
+      errors.max_tokens = 'Tokens máximos devem estar entre 100 e 4000';
     }
 
     setFormErrors(errors);
@@ -205,7 +127,6 @@ export const Agents: React.FC = () => {
 
   const handleInputChange = (field: keyof AgentFormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    // Limpar erro do campo quando o usuário começar a digitar
     if (formErrors[field]) {
       setFormErrors(prev => ({ ...prev, [field]: undefined }));
     }
@@ -217,11 +138,11 @@ export const Agents: React.FC = () => {
       description: '',
       objective: '',
       personality: 'professional',
-      aiProvider: 'chatgpt',
+      ai_provider: 'chatgpt',
       model: 'gpt-3.5-turbo',
-      systemPrompt: '',
+      system_prompt: '',
       temperature: 0.7,
-      maxTokens: 1000,
+      max_tokens: 1000,
     });
     setFormErrors({});
   };
@@ -237,56 +158,16 @@ export const Agents: React.FC = () => {
       setCreateLoading(true);
       setFormErrors({});
       
-      const agentData = {
-        name: formData.name.trim(),
-        description: formData.description.trim(),
-        objective: formData.objective.trim(),
-        personality: formData.personality,
-        ai_provider: formData.aiProvider,
-        model: formData.model.trim(),
-        system_prompt: formData.systemPrompt.trim(),
-        temperature: formData.temperature,
-        max_tokens: formData.maxTokens,
-      };
-
-      // Verificar se é modo demo
-      const token = localStorage.getItem('token');
+      const response = await apiService.createAgent(formData);
       
-      if (!token || token.includes('demo')) {
-        console.log('Criando agente em modo demonstração');
-        
-        // Simular criação de agente
-        const mockAgent = {
-          id: Date.now(),
-          name: agentData.name,
-          description: agentData.description,
-          objective: agentData.objective,
-          personality: agentData.personality,
-          ai_provider: agentData.ai_provider,
-          model: agentData.model,
-          system_prompt: agentData.system_prompt,
-          temperature: agentData.temperature,
-          max_tokens: agentData.max_tokens,
-          is_active: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          user_id: 1
-        };
-        
-        dispatch({ type: 'ADD_AGENT', payload: mockAgent });
-        showSuccess('Agente criado!', `${mockAgent.name} foi criado com sucesso`);
+      if (response.success) {
+        dispatch({ type: 'ADD_AGENT', payload: response.data.agent });
+        showSuccess('Agente criado!', `${response.data.agent.name} foi criado com sucesso`);
         setShowCreateModal(false);
         resetForm();
-        return;
+      } else {
+        throw new Error(response.error || 'Erro ao criar agente');
       }
-      
-      // Tentar criar agente real
-      const newAgent = await apiService.createAgent(agentData);
-      dispatch({ type: 'ADD_AGENT', payload: newAgent });
-      
-      showSuccess('Agente criado!', `${newAgent.name} foi criado com sucesso`);
-      setShowCreateModal(false);
-      resetForm();
     } catch (error) {
       console.error('Erro ao criar agente:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro ao criar agente';
@@ -305,30 +186,17 @@ export const Agents: React.FC = () => {
 
     setActionLoading(agentId);
     try {
-      // Verificar se é modo demo
-      const token = localStorage.getItem('token');
-      
-      if (!token || token.includes('demo')) {
-        console.log('Excluindo agente em modo demonstração');
-        
-        // Simular exclusão
-        dispatch({ type: 'DELETE_AGENT', payload: agentId });
-        showSuccess('Agente excluído!', `${agent?.name} foi excluído com sucesso`);
-        return;
-      }
-      
-      // Tentar excluir agente real
       const response = await apiService.deleteAgent(agentId);
+      
       if (response.success) {
         dispatch({ type: 'DELETE_AGENT', payload: agentId });
         showSuccess('Agente excluído!', `${agent?.name} foi excluído com sucesso`);
       } else {
-        showError('Erro ao excluir', response.message || 'Não foi possível excluir o agente');
+        throw new Error(response.error || 'Erro ao excluir agente');
       }
     } catch (error) {
       console.error('Erro ao excluir agente:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro ao excluir agente';
-      setError(errorMessage);
       showError('Erro ao excluir agente', errorMessage);
     } finally {
       setActionLoading(null);
@@ -340,41 +208,23 @@ export const Agents: React.FC = () => {
       setActionLoading(agentId);
       const agent = state.agents.find(a => a.id === agentId);
       if (agent) {
-        // Verificar se é modo demo
-        const token = localStorage.getItem('token');
-        
-        if (!token || token.includes('demo')) {
-          console.log('Alterando status do agente em modo demonstração');
-          
-          // Simular alteração de status
-          const updatedAgent = {
-            ...agent,
-            is_active: !agent.is_active,
-            isActive: !agent.is_active
-          };
-          
-          dispatch({ type: 'UPDATE_AGENT', payload: updatedAgent });
-          showSuccess(
-            `Agente ${updatedAgent.isActive ? 'ativado' : 'desativado'}!`,
-            `${updatedAgent.name} foi ${updatedAgent.isActive ? 'ativado' : 'desativado'} com sucesso`
-          );
-          return;
-        }
-        
-        // Tentar atualizar agente real
-        const updatedAgent = await apiService.updateAgent(agentId, { 
-          isActive: !agent.isActive 
+        const response = await apiService.updateAgent(agentId, { 
+          is_active: !agent.is_active 
         });
-        dispatch({ type: 'UPDATE_AGENT', payload: updatedAgent });
-        showSuccess(
-          `Agente ${updatedAgent.isActive ? 'ativado' : 'desativado'}!`,
-          `${updatedAgent.name} foi ${updatedAgent.isActive ? 'ativado' : 'desativado'} com sucesso`
-        );
+        
+        if (response.success) {
+          dispatch({ type: 'UPDATE_AGENT', payload: response.data.agent });
+          showSuccess(
+            `Agente ${response.data.agent.is_active ? 'ativado' : 'desativado'}!`,
+            `${response.data.agent.name} foi ${response.data.agent.is_active ? 'ativado' : 'desativado'} com sucesso`
+          );
+        } else {
+          throw new Error(response.error || 'Erro ao atualizar agente');
+        }
       }
     } catch (error) {
       console.error('Erro ao atualizar status do agente:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro ao atualizar agente';
-      setError(errorMessage);
       showError('Erro ao atualizar status', errorMessage);
     } finally {
       setActionLoading(null);
@@ -417,58 +267,6 @@ export const Agents: React.FC = () => {
         </button>
       </div>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg p-4 border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Total de Agentes</p>
-              <p className="text-2xl font-bold text-gray-900">{state.agents.length}</p>
-            </div>
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <ChatBubbleLeftRightIcon className="w-6 h-6 text-blue-600" />
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg p-4 border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Agentes Ativos</p>
-              <p className="text-2xl font-bold text-green-600">{Array.isArray(state.agents) ? state.agents.filter(a => a.isActive).length : 0}</p>
-            </div>
-            <div className="p-2 bg-green-100 rounded-lg">
-              <PlayIcon className="w-6 h-6 text-green-600" />
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg p-4 border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Conversas Hoje</p>
-              <p className="text-2xl font-bold text-purple-600">
-                {Array.isArray(state.agents) ? state.agents.reduce((sum, agent) => sum + (agent.metrics?.dailyMessages || 0), 0) : 0}
-              </p>
-            </div>
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <ChatBubbleLeftRightIcon className="w-6 h-6 text-purple-600" />
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg p-4 border border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Satisfação Média</p>
-              <p className="text-2xl font-bold text-yellow-600">
-                {Array.isArray(state.agents) && state.agents.length > 0 ? (state.agents.reduce((sum, agent) => sum + (agent.metrics?.satisfactionRating || 0), 0) / state.agents.length).toFixed(1) : '0.0'}
-              </p>
-            </div>
-            <div className="p-2 bg-yellow-100 rounded-lg">
-              <StarIcon className="w-6 h-6 text-yellow-600" />
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Loading State */}
       {loading && (
         <div className="flex items-center justify-center py-12">
@@ -492,6 +290,63 @@ export const Agents: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Stats Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Total de Agentes</p>
+              <p className="text-2xl font-bold text-gray-900">{state.agents.length}</p>
+            </div>
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <ChatBubbleLeftRightIcon className="w-6 h-6 text-blue-600" />
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Agentes Ativos</p>
+              <p className="text-2xl font-bold text-green-600">
+                {Array.isArray(state.agents) ? state.agents.filter(a => a.is_active).length : 0}
+              </p>
+            </div>
+            <div className="p-2 bg-green-100 rounded-lg">
+              <PlayIcon className="w-6 h-6 text-green-600" />
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Conversas Hoje</p>
+              <p className="text-2xl font-bold text-purple-600">
+                {Array.isArray(state.agents) ? state.agents.reduce((sum, agent) => sum + (agent.total_conversations || 0), 0) : 0}
+              </p>
+            </div>
+            <div className="p-2 bg-purple-100 rounded-lg">
+              <ChatBubbleLeftRightIcon className="w-6 h-6 text-purple-600" />
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Satisfação Média</p>
+              <p className="text-2xl font-bold text-yellow-600">
+                {Array.isArray(state.agents) && state.agents.length > 0 
+                  ? (state.agents.reduce((sum, agent) => sum + (agent.avg_satisfaction || 0), 0) / state.agents.length).toFixed(1)
+                  : '0.0'
+                }
+              </p>
+            </div>
+            <div className="p-2 bg-yellow-100 rounded-lg">
+              <StarIcon className="w-6 h-6 text-yellow-600" />
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Agents Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -519,14 +374,14 @@ export const Agents: React.FC = () => {
                   className={`p-2 rounded-lg transition-colors ${
                     actionLoading === agent.id
                       ? 'text-gray-400 cursor-not-allowed'
-                      : agent.isActive
+                      : agent.is_active
                       ? 'text-green-600 hover:bg-green-50'
                       : 'text-gray-400 hover:bg-gray-50'
                   }`}
                 >
                   {actionLoading === agent.id ? (
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>
-                  ) : agent.isActive ? (
+                  ) : agent.is_active ? (
                     <PauseIcon className="w-4 h-4" />
                   ) : (
                     <PlayIcon className="w-4 h-4" />
@@ -538,24 +393,24 @@ export const Agents: React.FC = () => {
             {/* Status */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-2">
-                <div className={`w-2 h-2 rounded-full ${agent.isActive ? 'bg-green-400' : 'bg-gray-400'}`}></div>
-                <span className={`text-sm font-medium ${agent.isActive ? 'text-green-600' : 'text-gray-500'}`}>
-                  {agent.isActive ? 'Ativo' : 'Inativo'}
+                <div className={`w-2 h-2 rounded-full ${agent.is_active ? 'bg-green-400' : 'bg-gray-400'}`}></div>
+                <span className={`text-sm font-medium ${agent.is_active ? 'text-green-600' : 'text-gray-500'}`}>
+                  {agent.is_active ? 'Ativo' : 'Inativo'}
                 </span>
               </div>
-              <div className={`px-2 py-1 rounded-full text-xs font-medium ${getProviderColor(agent.aiProvider)}`}>
-                {agent.aiProvider.toUpperCase()}
+              <div className={`px-2 py-1 rounded-full text-xs font-medium ${getProviderColor(agent.ai_provider)}`}>
+                {agent.ai_provider.toUpperCase()}
               </div>
             </div>
 
             {/* Metrics */}
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div className="text-center p-3 bg-gray-50 rounded-lg">
-                <p className="text-lg font-bold text-gray-900">{agent.metrics.totalConversations}</p>
+                <p className="text-lg font-bold text-gray-900">{agent.total_conversations || 0}</p>
                 <p className="text-xs text-gray-500">Conversas</p>
               </div>
               <div className="text-center p-3 bg-gray-50 rounded-lg">
-                <p className="text-lg font-bold text-gray-900">{agent.metrics?.satisfactionRating?.toFixed(1) || '0.0'}</p>
+                <p className="text-lg font-bold text-gray-900">{agent.avg_satisfaction?.toFixed(1) || '0.0'}</p>
                 <p className="text-xs text-gray-500">Satisfação</p>
               </div>
             </div>
@@ -564,15 +419,11 @@ export const Agents: React.FC = () => {
             <div className="space-y-2 mb-4">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-600">Tempo de Resposta</span>
-                <span className="font-medium">{agent.metrics.avgResponseTime}s</span>
+                <span className="font-medium">{agent.avg_response_time?.toFixed(1) || '0.0'}s</span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600">Taxa de Resolução</span>
-                <span className="font-medium">{agent.metrics.resolutionRate}%</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600">SLA Compliance</span>
-                <span className="font-medium">{agent.metrics.slaCompliance}%</span>
+                <span className="text-gray-600">Conversas Ativas</span>
+                <span className="font-medium">{agent.active_conversations || 0}</span>
               </div>
             </div>
 
@@ -598,7 +449,7 @@ export const Agents: React.FC = () => {
                 </button>
               </div>
               <div className="text-xs text-gray-500">
-                {agent.channels.length} canais
+                {agent.ai_provider}
               </div>
             </div>
           </motion.div>
@@ -606,7 +457,7 @@ export const Agents: React.FC = () => {
       </div>
 
       {/* Empty State */}
-      {state.agents.length === 0 && (
+      {!loading && state.agents.length === 0 && (
         <div className="text-center py-12">
           <ChatBubbleLeftRightIcon className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">Nenhum agente criado</h3>
@@ -730,8 +581,8 @@ export const Agents: React.FC = () => {
                       Provedor de IA
                     </label>
                     <select
-                      value={formData.aiProvider}
-                      onChange={(e) => handleInputChange('aiProvider', e.target.value)}
+                      value={formData.ai_provider}
+                      onChange={(e) => handleInputChange('ai_provider', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                       <option value="chatgpt">ChatGPT</option>
@@ -766,16 +617,16 @@ export const Agents: React.FC = () => {
                     Prompt do Sistema *
                   </label>
                   <textarea
-                    value={formData.systemPrompt}
-                    onChange={(e) => handleInputChange('systemPrompt', e.target.value)}
+                    value={formData.system_prompt}
+                    onChange={(e) => handleInputChange('system_prompt', e.target.value)}
                     rows={4}
                     className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                      formErrors.systemPrompt ? 'border-red-300' : 'border-gray-300'
+                      formErrors.system_prompt ? 'border-red-300' : 'border-gray-300'
                     }`}
                     placeholder="Instruções detalhadas sobre como o agente deve se comportar..."
                   />
-                  {formErrors.systemPrompt && (
-                    <p className="mt-1 text-sm text-red-600">{formErrors.systemPrompt}</p>
+                  {formErrors.system_prompt && (
+                    <p className="mt-1 text-sm text-red-600">{formErrors.system_prompt}</p>
                   )}
                 </div>
 
@@ -798,9 +649,6 @@ export const Agents: React.FC = () => {
                       <span>Conservador</span>
                       <span>Criativo</span>
                     </div>
-                    {formErrors.temperature && (
-                      <p className="mt-1 text-sm text-red-600">{formErrors.temperature}</p>
-                    )}
                   </div>
 
                   {/* Tokens Máximos */}
@@ -812,14 +660,14 @@ export const Agents: React.FC = () => {
                       type="number"
                       min="100"
                       max="4000"
-                      value={formData.maxTokens}
-                      onChange={(e) => handleInputChange('maxTokens', parseInt(e.target.value))}
+                      value={formData.max_tokens}
+                      onChange={(e) => handleInputChange('max_tokens', parseInt(e.target.value))}
                       className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                        formErrors.maxTokens ? 'border-red-300' : 'border-gray-300'
+                        formErrors.max_tokens ? 'border-red-300' : 'border-gray-300'
                       }`}
                     />
-                    {formErrors.maxTokens && (
-                      <p className="mt-1 text-sm text-red-600">{formErrors.maxTokens}</p>
+                    {formErrors.max_tokens && (
+                      <p className="mt-1 text-sm text-red-600">{formErrors.max_tokens}</p>
                     )}
                   </div>
                 </div>
