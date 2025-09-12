@@ -1,0 +1,104 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e5]:
+    - generic [ref=e7]:
+      - img [ref=e9]
+      - generic [ref=e11]:
+        - heading "AI Agents" [level=1] [ref=e12]
+        - paragraph [ref=e13]: SaaS Platform 2025
+    - generic [ref=e15]:
+      - img "Usuário Teste" [ref=e16]
+      - generic [ref=e17]:
+        - paragraph [ref=e18]: Usuário Teste
+        - paragraph [ref=e19]: free plan
+    - navigation [ref=e20]:
+      - link "Dashboard" [ref=e21] [cursor=pointer]:
+        - /url: /
+        - img [ref=e22] [cursor=pointer]
+        - text: Dashboard
+      - link "Agentes de IA" [ref=e24] [cursor=pointer]:
+        - /url: /agents
+        - img [ref=e25] [cursor=pointer]
+        - text: Agentes de IA
+      - link "Conversas" [ref=e27] [cursor=pointer]:
+        - /url: /conversations
+        - img [ref=e28] [cursor=pointer]
+        - text: Conversas
+      - link "WhatsApp" [ref=e30] [cursor=pointer]:
+        - /url: /whatsapp
+        - img [ref=e31] [cursor=pointer]
+        - text: WhatsApp
+      - link "Analytics" [ref=e33] [cursor=pointer]:
+        - /url: /analytics
+        - img [ref=e34] [cursor=pointer]
+        - text: Analytics
+      - link "Integrações" [ref=e36] [cursor=pointer]:
+        - /url: /integrations
+        - img [ref=e37] [cursor=pointer]
+        - text: Integrações
+      - link "Treinamento" [ref=e39] [cursor=pointer]:
+        - /url: /training
+        - img [ref=e40] [cursor=pointer]
+        - text: Treinamento
+      - link "Canais" [ref=e42] [cursor=pointer]:
+        - /url: /channels
+        - img [ref=e43] [cursor=pointer]
+        - text: Canais
+      - link "Alertas" [ref=e45] [cursor=pointer]:
+        - /url: /alerts
+        - img [ref=e46] [cursor=pointer]
+        - text: Alertas
+      - link "Configurações" [ref=e48] [cursor=pointer]:
+        - /url: /settings
+        - img [ref=e49] [cursor=pointer]
+        - text: Configurações
+    - generic [ref=e52]:
+      - generic [ref=e53]:
+        - generic [ref=e54]: Agentes Ativos
+        - generic [ref=e55]: "0"
+      - generic [ref=e56]:
+        - generic [ref=e57]: Conversas Hoje
+        - generic [ref=e58]: "0"
+  - generic [ref=e59]:
+    - banner [ref=e60]:
+      - generic [ref=e61]:
+        - generic [ref=e63]:
+          - generic:
+            - img
+          - textbox "Buscar agentes, conversas, clientes..." [ref=e64]
+        - generic [ref=e65]:
+          - button [ref=e66] [cursor=pointer]:
+            - img [ref=e67] [cursor=pointer]
+          - generic [ref=e70]:
+            - generic [ref=e71]:
+              - paragraph [ref=e72]: Usuário Teste
+              - paragraph [ref=e73]: test@example.com
+            - img "Usuário Teste"
+    - main [ref=e74]:
+      - generic [ref=e75]:
+        - generic [ref=e76]:
+          - generic [ref=e77]:
+            - heading "WhatsApp Business" [level=1] [ref=e78]
+            - paragraph [ref=e79]: Gerencie conversas e atendimentos em tempo real
+          - generic [ref=e80]:
+            - generic [ref=e81]:
+              - img [ref=e82]
+              - generic [ref=e83]: Conectado
+            - button "Configurações" [ref=e84] [cursor=pointer]:
+              - img [ref=e85] [cursor=pointer]
+              - text: Configurações
+        - generic [ref=e88]:
+          - generic [ref=e89]:
+            - generic [ref=e90]:
+              - heading "Conversas Ativas" [level=3] [ref=e91]
+              - paragraph [ref=e92]: 0 sessões
+            - generic [ref=e94]:
+              - img [ref=e95]
+              - paragraph [ref=e97]: Nenhuma conversa ativa
+          - generic [ref=e100]:
+            - img [ref=e101]
+            - paragraph [ref=e103]: Selecione uma conversa
+            - paragraph [ref=e104]: Escolha uma conversa da lista para começar
+```

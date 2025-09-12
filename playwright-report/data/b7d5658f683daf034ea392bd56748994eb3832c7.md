@@ -1,0 +1,93 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e5]:
+      - generic [ref=e7]:
+        - img [ref=e9]
+        - generic [ref=e11]:
+          - heading "AI Agents" [level=1] [ref=e12]
+          - paragraph [ref=e13]: SaaS Platform 2025
+      - generic [ref=e15]:
+        - img [ref=e16]
+        - generic [ref=e17]:
+          - paragraph
+          - paragraph [ref=e18]: plan
+      - navigation [ref=e19]:
+        - link "Dashboard" [ref=e20]:
+          - /url: /
+          - img [ref=e21]
+          - text: Dashboard
+        - link "Agentes de IA" [ref=e23]:
+          - /url: /agents
+          - img [ref=e24]
+          - text: Agentes de IA
+        - link "Conversas" [ref=e26]:
+          - /url: /conversations
+          - img [ref=e27]
+          - text: Conversas
+        - link "WhatsApp" [ref=e29]:
+          - /url: /whatsapp
+          - img [ref=e30]
+          - text: WhatsApp
+        - link "Analytics" [ref=e32]:
+          - /url: /analytics
+          - img [ref=e33]
+          - text: Analytics
+        - link "Integrações" [ref=e35]:
+          - /url: /integrations
+          - img [ref=e36]
+          - text: Integrações
+        - link "Treinamento" [ref=e38]:
+          - /url: /training
+          - img [ref=e39]
+          - text: Treinamento
+        - link "Canais" [ref=e41]:
+          - /url: /channels
+          - img [ref=e42]
+          - text: Canais
+        - link "Alertas" [ref=e44]:
+          - /url: /alerts
+          - img [ref=e45]
+          - text: Alertas
+        - link "Configurações" [ref=e47]:
+          - /url: /settings
+          - img [ref=e48]
+          - text: Configurações
+      - generic [ref=e51]:
+        - generic [ref=e52]:
+          - generic [ref=e53]: Agentes Ativos
+          - generic [ref=e54]: "0"
+        - generic [ref=e55]:
+          - generic [ref=e56]: Conversas Hoje
+          - generic [ref=e57]: "0"
+    - generic [ref=e58]:
+      - banner [ref=e59]:
+        - generic [ref=e60]:
+          - generic [ref=e62]:
+            - generic:
+              - img
+            - textbox "Buscar agentes, conversas, clientes..." [ref=e63]
+          - generic [ref=e64]:
+            - button [ref=e65] [cursor=pointer]:
+              - img [ref=e66] [cursor=pointer]
+            - generic [ref=e69]:
+              - generic:
+                - paragraph
+                - paragraph
+              - img
+      - main [ref=e70]:
+        - generic [ref=e72]:
+          - img [ref=e73]
+          - heading "Erro ao Carregar Dashboard" [level=2] [ref=e75]
+          - paragraph [ref=e76]: Erro interno do servidor
+          - button "Tentar Novamente" [ref=e77] [cursor=pointer]
+  - generic [ref=e80]:
+    - img [ref=e82]
+    - generic [ref=e84]:
+      - paragraph [ref=e85]: Login realizado com sucesso!
+      - paragraph [ref=e86]: Bem-vindo, Usuário Teste
+    - button [ref=e87] [cursor=pointer]:
+      - img [ref=e88] [cursor=pointer]
+```

@@ -1,0 +1,93 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e5]:
+      - generic [ref=e7]:
+        - img [ref=e9]
+        - generic [ref=e11]:
+          - heading "AI Agents" [level=1] [ref=e12]
+          - paragraph [ref=e13]: SaaS Platform 2025
+      - generic [ref=e15]:
+        - img [ref=e16]
+        - generic [ref=e17]:
+          - paragraph
+          - paragraph [ref=e18]: plan
+      - navigation [ref=e19]:
+        - link "Dashboard" [ref=e20] [cursor=pointer]:
+          - /url: /
+          - img [ref=e21] [cursor=pointer]
+          - text: Dashboard
+        - link "Agentes de IA" [ref=e23] [cursor=pointer]:
+          - /url: /agents
+          - img [ref=e24] [cursor=pointer]
+          - text: Agentes de IA
+        - link "Conversas" [ref=e26] [cursor=pointer]:
+          - /url: /conversations
+          - img [ref=e27] [cursor=pointer]
+          - text: Conversas
+        - link "WhatsApp" [ref=e29] [cursor=pointer]:
+          - /url: /whatsapp
+          - img [ref=e30] [cursor=pointer]
+          - text: WhatsApp
+        - link "Analytics" [ref=e32] [cursor=pointer]:
+          - /url: /analytics
+          - img [ref=e33] [cursor=pointer]
+          - text: Analytics
+        - link "Integrações" [ref=e35] [cursor=pointer]:
+          - /url: /integrations
+          - img [ref=e36] [cursor=pointer]
+          - text: Integrações
+        - link "Treinamento" [ref=e38] [cursor=pointer]:
+          - /url: /training
+          - img [ref=e39] [cursor=pointer]
+          - text: Treinamento
+        - link "Canais" [ref=e41] [cursor=pointer]:
+          - /url: /channels
+          - img [ref=e42] [cursor=pointer]
+          - text: Canais
+        - link "Alertas" [ref=e44] [cursor=pointer]:
+          - /url: /alerts
+          - img [ref=e45] [cursor=pointer]
+          - text: Alertas
+        - link "Configurações" [ref=e47] [cursor=pointer]:
+          - /url: /settings
+          - img [ref=e48] [cursor=pointer]
+          - text: Configurações
+      - generic [ref=e51]:
+        - generic [ref=e52]:
+          - generic [ref=e53]: Agentes Ativos
+          - generic [ref=e54]: "0"
+        - generic [ref=e55]:
+          - generic [ref=e56]: Conversas Hoje
+          - generic [ref=e57]: "0"
+    - generic [ref=e58]:
+      - banner [ref=e59]:
+        - generic [ref=e60]:
+          - generic [ref=e62]:
+            - generic:
+              - img
+            - textbox "Buscar agentes, conversas, clientes..." [ref=e63]
+          - generic [ref=e64]:
+            - button [ref=e65] [cursor=pointer]:
+              - img [ref=e66] [cursor=pointer]
+            - generic [ref=e69]:
+              - generic:
+                - paragraph
+                - paragraph
+              - img [ref=e70]
+      - main [ref=e71]:
+        - generic [ref=e73]:
+          - img [ref=e74]
+          - heading "Erro ao Carregar Dashboard" [level=2] [ref=e76]
+          - paragraph [ref=e77]: Erro interno do servidor
+          - button "Tentar Novamente" [ref=e78] [cursor=pointer]
+  - generic [ref=e81]:
+    - img [ref=e83]
+    - generic [ref=e85]:
+      - paragraph [ref=e86]: Login realizado com sucesso!
+      - paragraph [ref=e87]: Bem-vindo, Usuário Teste
+    - button [ref=e88] [cursor=pointer]:
+      - img [ref=e89] [cursor=pointer]
+```

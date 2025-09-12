@@ -1,0 +1,100 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - generic [ref=e5]: "[plugin:vite:react-babel]"
+    - generic [ref=e6]: "C:\\xampp\\htdocs\\SAAS AGENTE IA\\project\\src\\pages\\Integrations.tsx: Missing semicolon. (163:5) 166 | <div className=\"p-6 space-y-6\">"
+  - generic [ref=e7]:
+    - text: "C:"
+    - generic [ref=e8] [cursor=pointer]: /xampp/htdocs/SAAS AGENTE IA/project/src/pages/Integrations.tsx:163:5
+  - generic [ref=e9]: "161| color: 'gray', 162| }, 163| ];}]}}} | ^ 164| 165| return ("
+  - generic [ref=e10]:
+    - text: at constructor (
+    - generic [ref=e11] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:362:19
+    - text: ) at TypeScriptParserMixin.raise (
+    - generic [ref=e12] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:3259:19
+    - text: ) at TypeScriptParserMixin.semicolon (
+    - generic [ref=e13] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:3585:10
+    - text: ) at TypeScriptParserMixin.parseVarStatement (
+    - generic [ref=e14] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:12711:10
+    - text: ) at TypeScriptParserMixin.parseVarStatement (
+    - generic [ref=e15] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:9127:31
+    - text: ) at TypeScriptParserMixin.parseStatementContent (
+    - generic [ref=e16] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:12326:23
+    - text: ) at TypeScriptParserMixin.parseStatementContent (
+    - generic [ref=e17] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:9157:18
+    - text: ) at TypeScriptParserMixin.parseStatementLike (
+    - generic [ref=e18] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:12243:17
+    - text: ) at TypeScriptParserMixin.parseStatementListItem (
+    - generic [ref=e19] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:12223:17
+    - text: ) at TypeScriptParserMixin.parseExportDeclaration (
+    - generic [ref=e20] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:13402:17
+    - text: ) at TypeScriptParserMixin.parseExportDeclaration (
+    - generic [ref=e21] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:9285:85
+    - text: ) at TypeScriptParserMixin.maybeParseExportDeclaration (
+    - generic [ref=e22] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:13361:31
+    - text: ) at TypeScriptParserMixin.parseExport (
+    - generic [ref=e23] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:13286:29
+    - text: ) at TypeScriptParserMixin.parseExport (
+    - generic [ref=e24] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:9104:20
+    - text: ) at TypeScriptParserMixin.parseStatementContent (
+    - generic [ref=e25] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:12356:27
+    - text: ) at TypeScriptParserMixin.parseStatementContent (
+    - generic [ref=e26] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:9157:18
+    - text: ) at TypeScriptParserMixin.parseStatementLike (
+    - generic [ref=e27] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:12243:17
+    - text: ) at TypeScriptParserMixin.parseModuleItem (
+    - generic [ref=e28] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:12220:17
+    - text: ) at TypeScriptParserMixin.parseBlockOrModuleBlockBody (
+    - generic [ref=e29] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:12796:36
+    - text: ) at TypeScriptParserMixin.parseBlockBody (
+    - generic [ref=e30] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:12789:10
+    - text: ) at TypeScriptParserMixin.parseProgram (
+    - generic [ref=e31] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:12117:10
+    - text: ) at TypeScriptParserMixin.parseTopLevel (
+    - generic [ref=e32] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:12107:25
+    - text: ) at TypeScriptParserMixin.parse (
+    - generic [ref=e33] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:13923:10
+    - text: ) at TypeScriptParserMixin.parse (
+    - generic [ref=e34] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:9771:18
+    - text: ) at parse (
+    - generic [ref=e35] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:13957:38
+    - text: ) at parser (
+    - generic [ref=e36] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\core\lib\parser\index.js:41:34
+    - text: ) at parser.next (<anonymous>) at normalizeFile (
+    - generic [ref=e37] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\core\lib\transformation\normalize-file.js:64:37
+    - text: ) at normalizeFile.next (<anonymous>) at run (
+    - generic [ref=e38] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\core\lib\transformation\index.js:21:50
+    - text: ) at run.next (<anonymous>) at transform (
+    - generic [ref=e39] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\core\lib\transform.js:22:33
+    - text: ) at transform.next (<anonymous>) at step (
+    - generic [ref=e40] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\gensync\index.js:261:32
+    - text: ) at
+    - generic [ref=e41] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\gensync\index.js:273:13
+    - text: at async.call.result.err.err (
+    - generic [ref=e42] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\gensync\index.js:223:11
+    - text: ) at
+    - generic [ref=e43] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\gensync\index.js:189:28
+    - text: at
+    - generic [ref=e44] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\core\lib\gensync-utils\async.js:67:7
+    - text: at
+    - generic [ref=e45] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\gensync\index.js:113:33
+    - text: at step (
+    - generic [ref=e46] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\gensync\index.js:287:14
+    - text: ) at
+    - generic [ref=e47] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\gensync\index.js:273:13
+    - text: at async.call.result.err.err (
+    - generic [ref=e48] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\gensync\index.js:223:11
+  - generic [ref=e49]:
+    - text: Click outside, press
+    - generic [ref=e50]: Esc
+    - text: key, or fix the code to dismiss.
+    - text: You can also disable this overlay by setting
+    - code [ref=e51]: server.hmr.overlay
+    - text: to
+    - code [ref=e52]: "false"
+    - text: in
+    - code [ref=e53]: vite.config.ts
+    - text: .
+```

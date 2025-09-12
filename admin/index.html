@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo - AI Agents SaaS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div id="app">
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-6">
+                    <div class="flex items-center">
+                        <h1 class="text-2xl font-bold text-gray-900">Painel Administrativo</h1>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span class="text-sm text-gray-500" id="admin-name">Admin</span>
+                        <button onclick="logout()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            Sair
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Login Form (initially hidden) -->
+        <div id="login-form" class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+            <div class="max-w-md w-full space-y-8">
+                <div>
+                    <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                        Acesso Administrativo
+                    </h2>
+                    <p class="mt-2 text-center text-sm text-gray-600">
+                        Apenas para o proprietário do software
+                    </p>
+                </div>
+                <form class="mt-8 space-y-6" onsubmit="adminLogin(event)">
+                    <div class="rounded-md shadow-sm -space-y-px">
+                        <div>
+                            <input id="admin-email" name="email" type="email" required
+                                class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                                placeholder="Email administrativo">
+                        </div>
+                        <div>
+                            <input id="admin-password" name="password" type="password" required
+                                class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                                placeholder="Senha">
+                        </div>
+                    </div>
+                    <div>
+                        <button type="submit"
+                            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Entrar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Dashboard (initially hidden) -->
+        <div id="dashboard" class="hidden">
+            <!-- Navigation Tabs -->
+            <div class="bg-white shadow">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <nav class="flex space-x-8" aria-label="Tabs">
+                        <button onclick="showTab('overview')" id="tab-overview" class="tab-button active border-indigo-500 text-indigo-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                            Visão Geral
+                        </button>
+                        <button onclick="showTab('users')" id="tab-users" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                            Usuários
+                        </button>
+                        <button onclick="showTab('payments')" id="tab-payments" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                            Pagamentos
+                        </button>
+                        <button onclick="showTab('settings')" id="tab-settings" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                            Configurações
+                        </button>
+                        <button onclick="showTab('logs')" id="tab-logs" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                            Logs
+                        </button>
+                        <button onclick="showTab('reports')" id="tab-reports" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                            Relatórios
+                        </button>
+                        <button onclick="showTab('support')" id="tab-support" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                            Suporte
+                        </button>
+                    </nav>
+                </div>
+            </div>
+            
+            <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+                <!-- Overview Tab -->
+                <div id="content-overview" class="tab-content">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="p-5">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                                        <span class="text-white text-sm font-bold">$</span>
+                                    </div>
+                                </div>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">Receita Mensal</dt>
+                                        <dd class="text-lg font-medium text-gray-900" id="monthly-revenue">R$ 0,00</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="p-5">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                                        <span class="text-white text-sm font-bold">P</span>
+                                    </div>
+                                </div>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">Planos Ativos</dt>
+                                        <dd class="text-lg font-medium text-gray-900" id="active-plans">-</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="p-5">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                                        <span class="text-white text-sm font-bold">U</span>
+                                    </div>
+                                </div>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">Total de Usuários</dt>
+                                        <dd class="text-lg font-medium text-gray-900" id="total-users">-</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="p-5">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                                        <span class="text-white text-sm font-bold">A</span>
+                                    </div>
+                                </div>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">Agentes Ativos</dt>
+                                        <dd class="text-lg font-medium text-gray-900" id="active-agents">-</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="p-5">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <div class="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
+                                        <span class="text-white text-sm font-bold">C</span>
+                                    </div>
+                                </div>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">Conversas Hoje</dt>
+                                        <dd class="text-lg font-medium text-gray-900" id="conversations-today">-</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="p-5">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+                                        <span class="text-white text-sm font-bold">!</span>
+                                    </div>
+                                </div>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">Alertas</dt>
+                                        <dd class="text-lg font-medium text-gray-900" id="alerts-count">-</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Metrics -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="p-5">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Performance do Sistema</h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-sm text-gray-500">Tempo de Resposta Médio</span>
+                                    <span class="text-sm font-medium" id="avg-response-time">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-sm text-gray-500">Uptime</span>
+                                    <span class="text-sm font-medium text-green-600" id="system-uptime">99.9%</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-sm text-gray-500">CPU Usage</span>
+                                    <span class="text-sm font-medium" id="cpu-usage">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="p-5">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Métricas de Faturamento</h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-sm text-gray-500">MRR (Receita Recorrente)</span>
+                                    <span class="text-sm font-medium" id="mrr">R$ 0,00</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-sm text-gray-500">Churn Rate</span>
+                                    <span class="text-sm font-medium" id="churn-rate">0%</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-sm text-gray-500">LTV Médio</span>
+                                    <span class="text-sm font-medium" id="avg-ltv">R$ 0,00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="p-5">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Atividade Recente</h3>
+                            <div class="space-y-3" id="recent-activity">
+                                <div class="text-sm text-gray-500">Carregando...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+
+                <!-- Users Tab -->
+                <div id="content-users" class="tab-content hidden">
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-2xl font-bold text-gray-900">Gerenciamento de Usuários</h2>
+                            <button onclick="openUserModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                Novo Usuário
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+                        <div class="px-4 py-5 sm:px-6">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">Usuários do Sistema</h3>
+                            <p class="mt-1 max-w-2xl text-sm text-gray-500">Lista de todos os usuários cadastrados</p>
+                        </div>
+                        <div class="border-t border-gray-200">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Criado em</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="users-table" class="bg-white divide-y divide-gray-200">
+                                        <!-- Users will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payments Tab -->
+                <div id="content-payments" class="tab-content hidden">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-900">Gerenciamento de Planos e Pagamentos</h2>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                        <div class="bg-white shadow rounded-lg p-6">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Planos Ativos</h3>
+                            <div id="active-plans-list" class="space-y-3">
+                                <div class="text-sm text-gray-500">Carregando...</div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white shadow rounded-lg p-6">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Receita Mensal</h3>
+                            <div class="text-3xl font-bold text-green-600" id="monthly-revenue-display">R$ 0,00</div>
+                            <div class="text-sm text-gray-500 mt-2">Últimos 30 dias</div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+                        <div class="px-4 py-5 sm:px-6">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">Histórico de Pagamentos</h3>
+                        </div>
+                        <div class="border-t border-gray-200">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuário</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plano</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="payments-table" class="bg-white divide-y divide-gray-200">
+                                        <!-- Payments will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div id="content-settings" class="tab-content hidden">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-900">Configurações do Sistema</h2>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white shadow rounded-lg p-6">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Parâmetros Globais</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Nome da Aplicação</label>
+                                    <input type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" value="AI Agents SaaS">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">URL Base</label>
+                                    <input type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" value="http://localhost:3001">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Limite de Usuários por Plano</label>
+                                    <input type="number" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" value="100">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white shadow rounded-lg p-6">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Integrações</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-gray-700">WhatsApp API</span>
+                                    <span class="text-sm text-green-600">Conectado</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-gray-700">Stripe</span>
+                                    <span class="text-sm text-yellow-600">Configurar</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-gray-700">Email SMTP</span>
+                                    <span class="text-sm text-red-600">Desconectado</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logs Tab -->
+                <div id="content-logs" class="tab-content hidden">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-900">Logs e Auditoria</h2>
+                    </div>
+                    
+                    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+                        <div class="px-4 py-5 sm:px-6">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">Eventos do Sistema</h3>
+                            <p class="mt-1 max-w-2xl text-sm text-gray-500">Registro de atividades e eventos críticos</p>
+                        </div>
+                        <div class="border-t border-gray-200">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuário</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ação</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Recurso</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="logs-table" class="bg-white divide-y divide-gray-200">
+                                        <!-- Logs will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reports Tab -->
+                <div id="content-reports" class="tab-content hidden">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-900">Relatórios Avançados</h2>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                        <div class="bg-white shadow rounded-lg p-6">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">KPIs Principais</h3>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Taxa de Conversão</span>
+                                    <span class="text-lg font-semibold text-green-600">12.5%</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">CAC (Custo de Aquisição)</span>
+                                    <span class="text-lg font-semibold">R$ 45,00</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Satisfação do Cliente</span>
+                                    <span class="text-lg font-semibold text-green-600">4.8/5</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white shadow rounded-lg p-6">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Exportar Dados</h3>
+                            <div class="space-y-3">
+                                <button class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                    Exportar Usuários (CSV)
+                                </button>
+                                <button class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                    Exportar Pagamentos (Excel)
+                                </button>
+                                <button class="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                    Relatório Completo (PDF)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Support Tab -->
+                <div id="content-support" class="tab-content hidden">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-900">Suporte e Chamados</h2>
+                    </div>
+                    
+                    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+                        <div class="px-4 py-5 sm:px-6">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">Tickets de Suporte</h3>
+                            <p class="mt-1 max-w-2xl text-sm text-gray-500">Gerenciar solicitações de suporte dos usuários</p>
+                        </div>
+                        <div class="border-t border-gray-200">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuário</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assunto</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prioridade</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="support-table" class="bg-white divide-y divide-gray-200">
+                                        <!-- Support tickets will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Criar/Editar Usuário -->
+    <div id="userModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900" id="modalTitle">Criar Novo Usuário</h3>
+                    <button onclick="closeUserModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <form id="userForm" onsubmit="submitUserForm(event)">
+                    <input type="hidden" id="userId" name="userId">
+                    <div class="mb-4">
+                        <label for="userName" class="block text-sm font-medium text-gray-700 mb-2">Nome Completo</label>
+                        <input type="text" id="userName" name="name" required 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div class="mb-4">
+                        <label for="userEmail" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input type="email" id="userEmail" name="email" required 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div class="mb-4">
+                        <label for="userPassword" class="block text-sm font-medium text-gray-700 mb-2">Senha</label>
+                        <input type="password" id="userPassword" name="password" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <p class="text-xs text-gray-500 mt-1">Deixe em branco para manter a senha atual (apenas edição)</p>
+                    </div>
+                    <div class="mb-4">
+                        <label for="userRole" class="block text-sm font-medium text-gray-700 mb-2">Tipo de Usuário</label>
+                        <select id="userRole" name="role" required 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="user">Cliente</option>
+                            <option value="admin">Administrador</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label for="userPlan" class="block text-sm font-medium text-gray-700 mb-2">Plano</label>
+                        <select id="userPlan" name="plan" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="free">Gratuito</option>
+                            <option value="basic">Básico</option>
+                            <option value="premium">Premium</option>
+                            <option value="enterprise">Enterprise</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="closeUserModal()" 
+                                class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">
+                            Cancelar
+                        </button>
+                        <button type="submit" 
+                                class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                            Salvar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação -->
+    <div id="confirmModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                    <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mt-2" id="confirmTitle">Confirmar Ação</h3>
+                <p class="text-sm text-gray-500 mt-2" id="confirmMessage">Tem certeza que deseja realizar esta ação?</p>
+                <div class="flex justify-center space-x-3 mt-4">
+                    <button onclick="closeConfirmModal()" 
+                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">
+                        Cancelar
+                    </button>
+                    <button id="confirmButton" 
+                            class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700">
+                        Confirmar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <script src="./admin.js"></script>
+</body>
+</html>

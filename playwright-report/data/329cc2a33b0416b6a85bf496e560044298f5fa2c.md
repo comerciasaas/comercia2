@@ -1,0 +1,201 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e5]:
+      - generic [ref=e7]:
+        - img [ref=e9]
+        - generic [ref=e11]:
+          - heading "AI Agents" [level=1] [ref=e12]
+          - paragraph [ref=e13]: SaaS Platform 2025
+      - generic [ref=e15]:
+        - img "Usuário Teste" [ref=e16]
+        - generic [ref=e17]:
+          - paragraph [ref=e18]: Usuário Teste
+          - paragraph [ref=e19]: free plan
+      - navigation [ref=e20]:
+        - link "Dashboard" [ref=e21]:
+          - /url: /
+          - img [ref=e22]
+          - text: Dashboard
+        - link "Agentes de IA" [ref=e24]:
+          - /url: /agents
+          - img [ref=e25]
+          - text: Agentes de IA
+        - link "Conversas" [ref=e27]:
+          - /url: /conversations
+          - img [ref=e28]
+          - text: Conversas
+        - link "WhatsApp" [ref=e30]:
+          - /url: /whatsapp
+          - img [ref=e31]
+          - text: WhatsApp
+        - link "Analytics" [ref=e33]:
+          - /url: /analytics
+          - img [ref=e34]
+          - text: Analytics
+        - link "Integrações" [ref=e36]:
+          - /url: /integrations
+          - img [ref=e37]
+          - text: Integrações
+        - link "Treinamento" [ref=e39]:
+          - /url: /training
+          - img [ref=e40]
+          - text: Treinamento
+        - link "Canais" [ref=e42]:
+          - /url: /channels
+          - img [ref=e43]
+          - text: Canais
+        - link "Alertas" [ref=e45]:
+          - /url: /alerts
+          - img [ref=e46]
+          - text: Alertas
+        - link "Configurações" [ref=e48]:
+          - /url: /settings
+          - img [ref=e49]
+          - text: Configurações
+      - generic [ref=e52]:
+        - generic [ref=e53]:
+          - generic [ref=e54]: Agentes Ativos
+          - generic [ref=e55]: "0"
+        - generic [ref=e56]:
+          - generic [ref=e57]: Conversas Hoje
+          - generic [ref=e58]: "0"
+    - generic [ref=e59]:
+      - banner [ref=e60]:
+        - generic [ref=e61]:
+          - generic [ref=e63]:
+            - generic:
+              - img
+            - textbox "Buscar agentes, conversas, clientes..." [ref=e64]
+          - generic [ref=e65]:
+            - button [ref=e66] [cursor=pointer]:
+              - img [ref=e67] [cursor=pointer]
+            - generic [ref=e70]:
+              - generic [ref=e71]:
+                - paragraph [ref=e72]: Usuário Teste
+                - paragraph [ref=e73]: test@example.com
+              - img "Usuário Teste" [ref=e74]
+      - main [ref=e75]:
+        - generic [ref=e76]:
+          - generic [ref=e77]:
+            - generic [ref=e78]:
+              - heading "WhatsApp Business" [level=1] [ref=e79]
+              - paragraph [ref=e80]: Gerencie conversas e atendimentos em tempo real
+            - generic [ref=e81]:
+              - generic [ref=e82]:
+                - img [ref=e83]
+                - generic [ref=e84]: Conectado
+              - button "Configurações" [ref=e85] [cursor=pointer]:
+                - img [ref=e86] [cursor=pointer]
+                - text: Configurações
+          - generic [ref=e89]:
+            - generic [ref=e90]:
+              - generic [ref=e91]:
+                - heading "Conversas Ativas" [level=3] [ref=e92]
+                - paragraph [ref=e93]: 0 sessões
+              - generic [ref=e95]:
+                - img [ref=e96]
+                - paragraph [ref=e98]: Nenhuma conversa ativa
+            - generic [ref=e101]:
+              - img [ref=e102]
+              - paragraph [ref=e104]: Selecione uma conversa
+              - paragraph [ref=e105]: Escolha uma conversa da lista para começar
+  - generic [ref=e108]:
+    - generic [ref=e109]:
+      - generic [ref=e110]: "[plugin:vite:react-babel]"
+      - generic [ref=e111]: "C:\\xampp\\htdocs\\SAAS AGENTE IA\\project\\src\\pages\\Integrations.tsx: Missing semicolon. (163:5) 166 | <div className=\"p-6 space-y-6\">"
+    - generic [ref=e112]:
+      - text: "C:"
+      - generic [ref=e113] [cursor=pointer]: /xampp/htdocs/SAAS AGENTE IA/project/src/pages/Integrations.tsx:163:5
+    - generic [ref=e114]: "161| color: 'gray', 162| }, 163| ];}]}}} | ^ 164| 165| return ("
+    - generic [ref=e115]:
+      - text: at constructor (
+      - generic [ref=e116] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:362:19
+      - text: ) at TypeScriptParserMixin.raise (
+      - generic [ref=e117] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:3259:19
+      - text: ) at TypeScriptParserMixin.semicolon (
+      - generic [ref=e118] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:3585:10
+      - text: ) at TypeScriptParserMixin.parseVarStatement (
+      - generic [ref=e119] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:12711:10
+      - text: ) at TypeScriptParserMixin.parseVarStatement (
+      - generic [ref=e120] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:9127:31
+      - text: ) at TypeScriptParserMixin.parseStatementContent (
+      - generic [ref=e121] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:12326:23
+      - text: ) at TypeScriptParserMixin.parseStatementContent (
+      - generic [ref=e122] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:9157:18
+      - text: ) at TypeScriptParserMixin.parseStatementLike (
+      - generic [ref=e123] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:12243:17
+      - text: ) at TypeScriptParserMixin.parseStatementListItem (
+      - generic [ref=e124] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:12223:17
+      - text: ) at TypeScriptParserMixin.parseExportDeclaration (
+      - generic [ref=e125] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:13402:17
+      - text: ) at TypeScriptParserMixin.parseExportDeclaration (
+      - generic [ref=e126] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:9285:85
+      - text: ) at TypeScriptParserMixin.maybeParseExportDeclaration (
+      - generic [ref=e127] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:13361:31
+      - text: ) at TypeScriptParserMixin.parseExport (
+      - generic [ref=e128] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:13286:29
+      - text: ) at TypeScriptParserMixin.parseExport (
+      - generic [ref=e129] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:9104:20
+      - text: ) at TypeScriptParserMixin.parseStatementContent (
+      - generic [ref=e130] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:12356:27
+      - text: ) at TypeScriptParserMixin.parseStatementContent (
+      - generic [ref=e131] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:9157:18
+      - text: ) at TypeScriptParserMixin.parseStatementLike (
+      - generic [ref=e132] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:12243:17
+      - text: ) at TypeScriptParserMixin.parseModuleItem (
+      - generic [ref=e133] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:12220:17
+      - text: ) at TypeScriptParserMixin.parseBlockOrModuleBlockBody (
+      - generic [ref=e134] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:12796:36
+      - text: ) at TypeScriptParserMixin.parseBlockBody (
+      - generic [ref=e135] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:12789:10
+      - text: ) at TypeScriptParserMixin.parseProgram (
+      - generic [ref=e136] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:12117:10
+      - text: ) at TypeScriptParserMixin.parseTopLevel (
+      - generic [ref=e137] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:12107:25
+      - text: ) at TypeScriptParserMixin.parse (
+      - generic [ref=e138] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:13923:10
+      - text: ) at TypeScriptParserMixin.parse (
+      - generic [ref=e139] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:9771:18
+      - text: ) at parse (
+      - generic [ref=e140] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\parser\lib\index.js:13957:38
+      - text: ) at parser (
+      - generic [ref=e141] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\core\lib\parser\index.js:41:34
+      - text: ) at parser.next (<anonymous>) at normalizeFile (
+      - generic [ref=e142] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\core\lib\transformation\normalize-file.js:64:37
+      - text: ) at normalizeFile.next (<anonymous>) at run (
+      - generic [ref=e143] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\core\lib\transformation\index.js:21:50
+      - text: ) at run.next (<anonymous>) at transform (
+      - generic [ref=e144] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\core\lib\transform.js:22:33
+      - text: ) at transform.next (<anonymous>) at step (
+      - generic [ref=e145] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\gensync\index.js:261:32
+      - text: ) at
+      - generic [ref=e146] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\gensync\index.js:273:13
+      - text: at async.call.result.err.err (
+      - generic [ref=e147] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\gensync\index.js:223:11
+      - text: ) at
+      - generic [ref=e148] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\gensync\index.js:189:28
+      - text: at
+      - generic [ref=e149] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\@babel\core\lib\gensync-utils\async.js:67:7
+      - text: at
+      - generic [ref=e150] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\gensync\index.js:113:33
+      - text: at step (
+      - generic [ref=e151] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\gensync\index.js:287:14
+      - text: ) at
+      - generic [ref=e152] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\gensync\index.js:273:13
+      - text: at async.call.result.err.err (
+      - generic [ref=e153] [cursor=pointer]: C:\xampp\htdocs\SAAS AGENTE IA\project\node_modules\gensync\index.js:223:11
+    - generic [ref=e154]:
+      - text: Click outside, press
+      - generic [ref=e155]: Esc
+      - text: key, or fix the code to dismiss.
+      - text: You can also disable this overlay by setting
+      - code [ref=e156]: server.hmr.overlay
+      - text: to
+      - code [ref=e157]: "false"
+      - text: in
+      - code [ref=e158]: vite.config.ts
+      - text: .
+```

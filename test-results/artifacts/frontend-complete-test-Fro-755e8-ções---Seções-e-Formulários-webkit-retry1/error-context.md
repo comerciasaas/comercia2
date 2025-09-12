@@ -1,0 +1,119 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e5]:
+    - generic [ref=e7]:
+      - img [ref=e9]
+      - generic [ref=e11]:
+        - heading "AI Agents" [level=1] [ref=e12]
+        - paragraph [ref=e13]: SaaS Platform 2025
+    - generic [ref=e15]:
+      - img "Usuário Teste" [ref=e16]
+      - generic [ref=e17]:
+        - paragraph [ref=e18]: Usuário Teste
+        - paragraph [ref=e19]: free plan
+    - navigation [ref=e20]:
+      - link "Dashboard" [ref=e21]:
+        - /url: /
+        - img [ref=e22]
+        - text: Dashboard
+      - link "Agentes de IA" [ref=e24]:
+        - /url: /agents
+        - img [ref=e25]
+        - text: Agentes de IA
+      - link "Conversas" [ref=e27]:
+        - /url: /conversations
+        - img [ref=e28]
+        - text: Conversas
+      - link "WhatsApp" [ref=e30]:
+        - /url: /whatsapp
+        - img [ref=e31]
+        - text: WhatsApp
+      - link "Analytics" [ref=e33]:
+        - /url: /analytics
+        - img [ref=e34]
+        - text: Analytics
+      - link "Integrações" [ref=e36]:
+        - /url: /integrations
+        - img [ref=e37]
+        - text: Integrações
+      - link "Treinamento" [ref=e39]:
+        - /url: /training
+        - img [ref=e40]
+        - text: Treinamento
+      - link "Canais" [ref=e42]:
+        - /url: /channels
+        - img [ref=e43]
+        - text: Canais
+      - link "Alertas" [ref=e45]:
+        - /url: /alerts
+        - img [ref=e46]
+        - text: Alertas
+      - link "Configurações" [ref=e48]:
+        - /url: /settings
+        - img [ref=e49]
+        - text: Configurações
+    - generic [ref=e52]:
+      - generic [ref=e53]:
+        - generic [ref=e54]: Agentes Ativos
+        - generic [ref=e55]: "0"
+      - generic [ref=e56]:
+        - generic [ref=e57]: Conversas Hoje
+        - generic [ref=e58]: "0"
+  - generic [ref=e59]:
+    - banner [ref=e60]:
+      - generic [ref=e61]:
+        - generic [ref=e63]:
+          - generic:
+            - img
+          - textbox "Buscar agentes, conversas, clientes..." [ref=e64]
+        - generic [ref=e65]:
+          - button [ref=e66] [cursor=pointer]:
+            - img [ref=e67] [cursor=pointer]
+          - generic [ref=e70]:
+            - generic [ref=e71]:
+              - paragraph [ref=e72]: Usuário Teste
+              - paragraph [ref=e73]: test@example.com
+            - img "Usuário Teste" [ref=e74]
+    - main [ref=e75]:
+      - generic [ref=e76]:
+        - generic [ref=e77]:
+          - heading "Configurações" [level=1] [ref=e78]
+          - paragraph [ref=e79]: Gerencie suas informações pessoais e configurações de conta
+        - navigation [ref=e82]:
+          - button "Perfil" [ref=e83] [cursor=pointer]:
+            - img [ref=e84] [cursor=pointer]
+            - text: Perfil
+          - button "Senha" [ref=e86] [cursor=pointer]:
+            - img [ref=e87] [cursor=pointer]
+            - text: Senha
+        - generic [ref=e89]:
+          - heading "Informações do Perfil" [level=2] [ref=e90]
+          - generic [ref=e91]:
+            - generic [ref=e92]:
+              - generic [ref=e93]: Nome Completo *
+              - generic [ref=e94]:
+                - generic:
+                  - img
+                - textbox "Seu nome completo" [ref=e95]: Usuário Teste
+            - generic [ref=e96]:
+              - generic [ref=e97]: Email *
+              - generic [ref=e98]:
+                - generic:
+                  - img
+                - textbox "seu@email.com" [ref=e99]: test@example.com
+            - generic [ref=e100]:
+              - generic [ref=e101]: Empresa
+              - generic [ref=e102]:
+                - generic:
+                  - img
+                - textbox "Nome da sua empresa" [ref=e103]
+            - generic [ref=e104]:
+              - generic [ref=e105]: Telefone
+              - generic [ref=e106]:
+                - generic:
+                  - img
+                - textbox "(11) 99999-9999" [ref=e107]
+            - button "Salvar Alterações" [ref=e109] [cursor=pointer]
+```
