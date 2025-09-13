@@ -19,6 +19,7 @@ const navigation = [
   { name: 'Dashboard', href: '/', icon: HomeIcon },
   { name: 'Agentes de IA', href: '/agents', icon: UserGroupIcon },
   { name: 'Conversas', href: '/conversations', icon: ChatBubbleLeftRightIcon },
+  { name: 'Chat IA', href: '/chat', icon: ChatBubbleLeftRightIcon },
   { name: 'WhatsApp', href: '/whatsapp', icon: DevicePhoneMobileIcon },
   { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
   { name: 'Integrações', href: '/integrations', icon: BoltIcon },

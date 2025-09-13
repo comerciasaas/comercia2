@@ -21,6 +21,8 @@ const authRoutes = require('./routes/auth');
 const agentRoutes = require('./routes/agents');
 const adminRoutes = require('./routes/admin');
 const conversationRoutes = require('./routes/conversations');
+const chatRoutes = require('./routes/chat');
+const whatsappRoutes = require('./routes/whatsapp');
 
 const app = express();
 const server = http.createServer(app);
@@ -99,6 +101,8 @@ app.use('/admin', express.static(path.join(__dirname, '../public/admin')));
 app.use('/api/auth', authRoutes);
 app.use('/api/agents', agentRoutes);
 app.use('/api/conversations', conversationRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/whatsapp', whatsappRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Health check

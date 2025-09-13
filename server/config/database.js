@@ -9,10 +9,8 @@ const mainConfig = {
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_NAME || 'ai_agents_saas_main',
   waitForConnections: true,
-  connectionLimit: 20,
+  connectionLimit: 10,
   queueLimit: 0,
-  acquireTimeout: 60000,
-  timeout: 60000,
   charset: 'utf8mb4'
 };
 
@@ -89,7 +87,7 @@ const createUserTables = async (pool) => {
       customer_name VARCHAR(255),
       customer_email VARCHAR(255),
       customer_phone VARCHAR(20),
-      channel_type ENUM('whatsapp', 'telegram', 'web', 'api') DEFAULT 'whatsapp',
+      channel_type ENUM('whatsapp', 'telegram', 'web', 'api', 'chat') DEFAULT 'chat',
       status ENUM('active', 'resolved', 'pending', 'closed') DEFAULT 'active',
       priority INT DEFAULT 1,
       satisfaction_rating DECIMAL(2,1),
@@ -118,7 +116,7 @@ const createUserTables = async (pool) => {
       media_url VARCHAR(500),
       whatsapp_message_id VARCHAR(100),
       status ENUM('sent', 'delivered', 'read', 'failed') DEFAULT 'sent',
-      response_time INT,
+      response_time DECIMAL(8,2),
       metadata JSON,
       timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -147,28 +145,21 @@ const createUserTables = async (pool) => {
       INDEX idx_whatsapp_status (status),
       INDEX idx_whatsapp_activity (last_activity)
     )`,
-    
-    // Tabela de métricas de agentes
-    `CREATE TABLE IF NOT EXISTS agent_metrics (
+
+    // Tabela de conhecimento (RAG)
+    `CREATE TABLE IF NOT EXISTS knowledge_base (
       id INT AUTO_INCREMENT PRIMARY KEY,
-      agent_id INT NOT NULL,
-      date DATE NOT NULL,
-      total_conversations INT DEFAULT 0,
-      total_messages INT DEFAULT 0,
-      avg_response_time DECIMAL(8,2) DEFAULT 0,
-      satisfaction_rating DECIMAL(3,2) DEFAULT 0,
-      resolution_rate DECIMAL(5,2) DEFAULT 0,
-      escalation_rate DECIMAL(5,2) DEFAULT 0,
-      active_conversations INT DEFAULT 0,
-      sla_compliance DECIMAL(5,2) DEFAULT 0,
-      cost_per_message DECIMAL(10,4) DEFAULT 0,
-      revenue_generated DECIMAL(10,2) DEFAULT 0,
+      title VARCHAR(255) NOT NULL,
+      content TEXT NOT NULL,
+      category VARCHAR(100),
+      tags JSON,
+      embedding JSON,
+      is_active BOOLEAN DEFAULT true,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      FOREIGN KEY (agent_id) REFERENCES agents(id) ON DELETE CASCADE,
-      UNIQUE KEY unique_agent_date (agent_id, date),
-      INDEX idx_metrics_agent (agent_id),
-      INDEX idx_metrics_date (date)
+      INDEX idx_knowledge_category (category),
+      INDEX idx_knowledge_active (is_active),
+      FULLTEXT idx_knowledge_content (title, content)
     )`
   ];
 

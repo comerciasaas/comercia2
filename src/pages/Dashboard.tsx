@@ -5,7 +5,6 @@ import {
   ChatBubbleLeftRightIcon,
   ClockIcon,
   StarIcon,
-  ArrowTrendingUpIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
 import { useApp } from '../contexts/AppContext';
@@ -26,7 +25,6 @@ export const Dashboard: React.FC = () => {
         setLoading(true);
         setError(null);
         
-        // Carregar dados reais do usuário
         const [agentStats, conversationStats, agents, conversations] = await Promise.all([
           apiService.getAgentStats(),
           apiService.getConversationStats(),
@@ -42,7 +40,7 @@ export const Dashboard: React.FC = () => {
             totalConversations: conversationStats.data?.stats?.total || 0,
             activeConversations: conversationStats.data?.stats?.active || 0,
             avgSatisfaction: conversationStats.data?.stats?.avgSatisfaction || 0,
-            avgResponseTime: 0 // Será calculado das métricas dos agentes
+            avgResponseTime: 0
           },
           trends: {
             dailyConversations: conversationStats.data?.stats?.dailyConversations || [],

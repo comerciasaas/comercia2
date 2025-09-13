@@ -9,6 +9,7 @@ import {
   PauseIcon,
   ChatBubbleLeftRightIcon,
   ExclamationTriangleIcon,
+  SparklesIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { useApp } from '../contexts/AppContext';
@@ -342,7 +343,7 @@ export const Agents: React.FC = () => {
               </p>
             </div>
             <div className="p-2 bg-yellow-100 rounded-lg">
-              <StarIcon className="w-6 h-6 text-yellow-600" />
+              <SparklesIcon className="w-6 h-6 text-yellow-600" />
             </div>
           </div>
         </div>

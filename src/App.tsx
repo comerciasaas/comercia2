@@ -14,6 +14,7 @@ const Conversations = lazy(() => import('./pages/Conversations').then(module => 
 const Integrations = lazy(() => import('./pages/Integrations').then(module => ({ default: module.Integrations })));
 const Settings = lazy(() => import('./pages/Settings').then(module => ({ default: module.Settings })));
 const WhatsApp = lazy(() => import('./pages/WhatsApp'));
+const Chat = lazy(() => import('./pages/Chat'));
 
 
 // Loading component
@@ -65,6 +66,7 @@ const AppContent: React.FC = () => {
                       <Route path="/agents" element={<Agents />} />
                       <Route path="/conversations" element={<Conversations />} />
                       <Route path="/whatsapp" element={<WhatsApp />} />
+                      <Route path="/chat" element={<Chat />} />
                       <Route path="/integrations" element={<Integrations />} />
                       <Route path="/analytics" element={<Dashboard />} />
                       <Route path="/training" element={<Dashboard />} />

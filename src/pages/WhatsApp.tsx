@@ -1,385 +1,105 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { MessageCircle, Send, Phone, Clock, Users, TrendingUp, AlertCircle, Settings, Signal } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
+import {
+  DevicePhoneMobileIcon,
+  PaperAirplaneIcon,
+  UserIcon,
+  CpuChipIcon,
+  ClockIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  CogIcon,
+} from '@heroicons/react/24/outline';
 import { useApp } from '../contexts/AppContext';
-import { useSocket } from '../hooks/useSocket';
 import { useNotification } from '../contexts/NotificationContext';
 import { apiService } from '../services/api';
 
 interface WhatsAppSession {
   id: string;
-  phoneNumber: string;
-  contactName: string;
-  agentId?: string;
-  agentName?: string;
-  status: 'active' | 'closed';
-  lastActivity: string;
-  stats: {
-    total_messages: number;
-    inbound_messages: number;
-    outbound_messages: number;
-    avg_response_time: number;
-  };
+  phone_number: string;
+  contact_name?: string;
+  agent_id?: string;
+  agent_name?: string;
+  status: 'active' | 'inactive' | 'ended';
+  last_activity: string;
+  message_count: number;
 }
 
 interface WhatsAppMessage {
   id: string;
   content: string;
-  direction: 'inbound' | 'outbound';
-  messageType: 'text' | 'image' | 'document' | 'audio';
-  createdAt: string;
-  status: 'sent' | 'delivered' | 'read';
+  sender: 'user' | 'agent';
+  timestamp: string;
+  status: string;
 }
 
-interface WhatsAppStats {
-  overview: {
-    active_sessions: number;
-    sessions_24h: number;
-    active_conversations: number;
-    messages_1h: number;
-    avg_response_time: number;
-    satisfied_customers: number;
-  };
-  agents: Array<{
-    id: string;
-    name: string;
-    active_sessions: number;
-    completed_24h: number;
-    avg_response_time: number;
-    avg_satisfaction: number;
-  }>;
-  hourlyDistribution: Array<{
-    hour: number;
-    message_count: number;
-    inbound_count: number;
-    outbound_count: number;
-  }>;
-}
-
-const WhatsApp: React.FC = () => {
+export const WhatsApp: React.FC = () => {
   const { state } = useApp();
   const { showSuccess, showError, showInfo } = useNotification();
-  const [stats, setStats] = useState<WhatsAppStats | null>(null);
   const [sessions, setSessions] = useState<WhatsAppSession[]>([]);
   const [selectedSession, setSelectedSession] = useState<WhatsAppSession | null>(null);
   const [messages, setMessages] = useState<WhatsAppMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [sendingMessage, setSendingMessage] = useState(false);
-  const [typingIndicators, setTypingIndicators] = useState<Map<string, boolean>>(new Map());
+  const [showConfig, setShowConfig] = useState(false);
+  const [whatsappConfig, setWhatsappConfig] = useState({
+    accessToken: '',
+    phoneNumberId: '',
+    webhookToken: ''
+  });
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
-  const { isConnected, on, off, joinWhatsAppSession, leaveWhatsAppSession, sendTypingIndicator } = useSocket();
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  // Real-time event handlers
-  const handleNewMessage = useCallback((data: any) => {
-    if (selectedSession && data.sessionId === selectedSession.id) {
-      setMessages(prev => [...prev, data]);
-    }
-    
-    // Update session in the list
-    setSessions(prev => prev.map(session => 
-      session.id === data.sessionId 
-        ? { ...session, lastActivity: data.createdAt }
-        : session
-    ));
-  }, [selectedSession]);
-
-  const handleNewSession = useCallback((data: any) => {
-    setSessions(prev => [data, ...prev]);
-    fetchStats(); // Refresh stats
+    loadSessions();
+    checkWhatsAppConfig();
   }, []);
-
-  const handleSessionStatusChange = useCallback((data: any) => {
-    setSessions(prev => prev.map(session => 
-      session.id === data.sessionId 
-        ? { ...session, status: data.status }
-        : session
-    ));
-  }, []);
-
-  const handleAgentAssigned = useCallback((data: any) => {
-    setSessions(prev => prev.map(session => 
-      session.id === data.sessionId 
-        ? { ...session, agentId: data.agentId, agentName: data.agentName }
-        : session
-    ));
-  }, []);
-
-  const handleTypingIndicator = useCallback((data: any) => {
-    setTypingIndicators(prev => {
-      const newMap = new Map(prev);
-      if (data.isTyping) {
-        newMap.set(data.sessionId, true);
-        // Clear typing indicator after 3 seconds
-        setTimeout(() => {
-          setTypingIndicators(current => {
-            const updated = new Map(current);
-            updated.delete(data.sessionId);
-            return updated;
-          });
-        }, 3000);
-      } else {
-        newMap.delete(data.sessionId);
-      }
-      return newMap;
-    });
-  }, []);
-
-  useEffect(() => {
-    fetchStats();
-    fetchActiveSessions();
-    
-    // Set up real-time event listeners
-    on('whatsapp-message-received', handleNewMessage);
-    on('new-whatsapp-session', handleNewSession);
-    on('session-status-changed', handleSessionStatusChange);
-    on('agent-assigned', handleAgentAssigned);
-    on('agent-typing', handleTypingIndicator);
-    
-    // Atualizar dados a cada 60 segundos
-    const interval = setInterval(() => {
-      fetchStats();
-      fetchActiveSessions();
-      if (selectedSession) {
-        fetchConversationHistory(selectedSession.phoneNumber);
-      }
-    }, 60000);
-
-    return () => {
-      clearInterval(interval);
-      off('whatsapp-message-received', handleNewMessage);
-      off('new-whatsapp-session', handleNewSession);
-      off('session-status-changed', handleSessionStatusChange);
-      off('agent-assigned', handleAgentAssigned);
-      off('agent-typing', handleTypingIndicator);
-    };
-  }, [handleNewMessage, handleNewSession, handleSessionStatusChange, handleAgentAssigned, handleTypingIndicator, on, off]);
 
   useEffect(() => {
     if (selectedSession) {
-      // Leave previous session
-      if (selectedSession) {
-        leaveWhatsAppSession(selectedSession.id);
-      }
-      
-      // Join new session for real-time updates
-      joinWhatsAppSession(selectedSession.id);
-      
-      fetchConversationHistory(selectedSession.phoneNumber);
+      loadMessages();
     }
-  }, [selectedSession, joinWhatsAppSession, leaveWhatsAppSession]);
+  }, [selectedSession]);
 
-  const fetchStats = async () => {
-    try {
-      // Check for test credentials
-      const authToken = localStorage.getItem('authToken');
-      if (authToken === 'demo-token') {
-        // Mock WhatsApp stats
-        const mockStats = {
-          overview: {
-            active_sessions: 12,
-            sessions_24h: 45,
-            active_conversations: 8,
-            messages_1h: 127,
-            avg_response_time: 2.3,
-            satisfied_customers: 89
-          },
-          agents: [
-            {
-              id: '1',
-              name: 'Ana Silva',
-              active_sessions: 4,
-              completed_24h: 12,
-              avg_response_time: 1.8,
-              avg_satisfaction: 4.7
-            },
-            {
-              id: '2',
-              name: 'Carlos Santos',
-              active_sessions: 3,
-              completed_24h: 8,
-              avg_response_time: 2.1,
-              avg_satisfaction: 4.5
-            },
-            {
-              id: '3',
-              name: 'Maria Costa',
-              active_sessions: 5,
-              completed_24h: 15,
-              avg_response_time: 1.9,
-              avg_satisfaction: 4.8
-            }
-          ],
-          hourlyDistribution: Array.from({ length: 24 }, (_, i) => ({
-            hour: i,
-            message_count: Math.floor(Math.random() * 50) + 10,
-            inbound_count: Math.floor(Math.random() * 30) + 5,
-            outbound_count: Math.floor(Math.random() * 25) + 3
-          }))
-        };
-        setStats(mockStats);
-        return;
-      }
-      
-      const data = await apiService.getWhatsAppStats();
-      setStats(data);
-    } catch (error) {
-      console.error('Erro ao buscar estatísticas:', error);
+  const checkWhatsAppConfig = () => {
+    // Verificar se WhatsApp está configurado
+    const hasToken = process.env.WHATSAPP_ACCESS_TOKEN;
+    const hasPhoneId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+    
+    if (!hasToken || !hasPhoneId) {
+      showInfo(
+        'WhatsApp não configurado',
+        'Configure as credenciais do WhatsApp Business API para usar esta funcionalidade'
+      );
     }
   };
 
-  const fetchActiveSessions = async () => {
+  const loadSessions = async () => {
     try {
-      // Check for test credentials
-      const authToken = localStorage.getItem('authToken');
-      if (authToken === 'demo-token') {
-        // Mock WhatsApp sessions
-        const mockSessions = [
-          {
-            id: 'session-1',
-            phoneNumber: '+55 11 99999-9999',
-            contactName: 'João Silva',
-            agentId: '1',
-            agentName: 'Ana Silva',
-            status: 'active' as const,
-            lastActivity: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-            stats: {
-              total_messages: 15,
-              inbound_messages: 8,
-              outbound_messages: 7,
-              avg_response_time: 1.2
-            }
-          },
-          {
-            id: 'session-2',
-            phoneNumber: '+55 11 88888-8888',
-            contactName: 'Maria Santos',
-            agentId: '2',
-            agentName: 'Carlos Santos',
-            status: 'active' as const,
-            lastActivity: new Date(Date.now() - 12 * 60 * 1000).toISOString(),
-            stats: {
-              total_messages: 23,
-              inbound_messages: 12,
-              outbound_messages: 11,
-              avg_response_time: 2.1
-            }
-          },
-          {
-            id: 'session-3',
-            phoneNumber: '+55 11 77777-7777',
-            contactName: 'Pedro Costa',
-            status: 'active' as const,
-            lastActivity: new Date(Date.now() - 25 * 60 * 1000).toISOString(),
-            stats: {
-              total_messages: 7,
-              inbound_messages: 4,
-              outbound_messages: 3,
-              avg_response_time: 0.8
-            }
-          },
-          {
-            id: 'session-4',
-            phoneNumber: '+55 11 66666-6666',
-            contactName: 'Ana Oliveira',
-            agentId: '3',
-            agentName: 'Maria Costa',
-            status: 'closed' as const,
-            lastActivity: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-            stats: {
-              total_messages: 31,
-              inbound_messages: 16,
-              outbound_messages: 15,
-              avg_response_time: 1.9
-            }
-          }
-        ];
-        setSessions(mockSessions);
-        setLoading(false);
-        return;
-      }
+      setLoading(true);
+      const response = await apiService.request('/whatsapp/sessions');
       
-      const sessions = await apiService.getWhatsAppSessions();
-      setSessions(sessions);
+      if (response.success) {
+        setSessions(response.data.sessions);
+      }
     } catch (error) {
-      console.error('Erro ao buscar sessões ativas:', error);
+      console.error('Erro ao carregar sessões:', error);
+      showError('Erro', 'Não foi possível carregar as sessões do WhatsApp');
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchConversationHistory = async (phoneNumber: string) => {
+  const loadMessages = async () => {
+    if (!selectedSession) return;
+
     try {
-      // Check for test credentials
-      const authToken = localStorage.getItem('authToken');
-      if (authToken === 'demo-token') {
-        // Mock conversation history based on phone number
-        const mockMessages: WhatsAppMessage[] = [
-          {
-            id: 'msg-1',
-            content: 'Olá! Preciso de ajuda com meu pedido.',
-            direction: 'inbound',
-            messageType: 'text',
-            createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-            status: 'read'
-          },
-          {
-            id: 'msg-2',
-            content: 'Olá! Claro, posso te ajudar. Qual é o número do seu pedido?',
-            direction: 'outbound',
-            messageType: 'text',
-            createdAt: new Date(Date.now() - 28 * 60 * 1000).toISOString(),
-            status: 'read'
-          },
-          {
-            id: 'msg-3',
-            content: 'É o pedido #12345. Ainda não recebi o produto.',
-            direction: 'inbound',
-            messageType: 'text',
-            createdAt: new Date(Date.now() - 25 * 60 * 1000).toISOString(),
-            status: 'read'
-          },
-          {
-            id: 'msg-4',
-            content: 'Deixe-me verificar o status do seu pedido. Um momento, por favor.',
-            direction: 'outbound',
-            messageType: 'text',
-            createdAt: new Date(Date.now() - 23 * 60 * 1000).toISOString(),
-            status: 'read'
-          },
-          {
-            id: 'msg-5',
-            content: 'Verifiquei aqui e seu pedido foi enviado ontem. O código de rastreamento é BR123456789. Você pode acompanhar pelo site dos Correios.',
-            direction: 'outbound',
-            messageType: 'text',
-            createdAt: new Date(Date.now() - 20 * 60 * 1000).toISOString(),
-            status: 'read'
-          },
-          {
-            id: 'msg-6',
-            content: 'Perfeito! Muito obrigado pela ajuda. 😊',
-            direction: 'inbound',
-            messageType: 'text',
-            createdAt: new Date(Date.now() - 18 * 60 * 1000).toISOString(),
-            status: 'read'
-          }
-        ];
-        setMessages(mockMessages);
-        return;
+      const response = await apiService.request(`/chat/conversations/${selectedSession.id}/messages`);
+      if (response.success) {
+        setMessages(response.data.messages);
       }
-      
-      const messages = await apiService.getWhatsAppHistory(phoneNumber);
-      setMessages(messages.reverse()); // Reverter para mostrar mensagens mais antigas primeiro
     } catch (error) {
-      console.error('Erro ao buscar histórico:', error);
+      console.error('Erro ao carregar mensagens:', error);
     }
   };
 
@@ -387,370 +107,417 @@ const WhatsApp: React.FC = () => {
     if (!newMessage.trim() || !selectedSession || sendingMessage) return;
 
     setSendingMessage(true);
+    const messageText = newMessage;
+    setNewMessage('');
+
     try {
-      // Check for test credentials
-      const authToken = localStorage.getItem('authToken');
-      if (authToken === 'demo-token') {
-        // Mock message sending with delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Add message locally for immediate feedback
+      const response = await apiService.request('/whatsapp/send', {
+        method: 'POST',
+        body: JSON.stringify({
+          phoneNumber: selectedSession.phone_number,
+          message: messageText,
+          conversationId: selectedSession.id
+        })
+      });
+
+      if (response.success) {
+        // Adicionar mensagem localmente
         const newMsg: WhatsAppMessage = {
           id: Date.now().toString(),
-          content: newMessage,
-          direction: 'outbound',
-          messageType: 'text',
-          createdAt: new Date().toISOString(),
+          content: messageText,
+          sender: 'agent',
+          timestamp: new Date().toISOString(),
           status: 'sent'
         };
         setMessages(prev => [...prev, newMsg]);
-        
-        // Simulate automatic response after 2 seconds
-        setTimeout(() => {
-          const autoReply: WhatsAppMessage = {
-            id: (Date.now() + 1).toString(),
-            content: 'Obrigado pela mensagem! Esta é uma resposta automática de teste.',
-            direction: 'inbound',
-            messageType: 'text',
-            createdAt: new Date().toISOString(),
-            status: 'sent'
-          };
-          setMessages(prev => [...prev, autoReply]);
-        }, 2000);
-        
-        setNewMessage('');
-        setSendingMessage(false);
-        return;
+        showSuccess('Mensagem enviada!', 'Mensagem enviada via WhatsApp');
+      } else {
+        showError('Erro', response.error || 'Erro ao enviar mensagem');
+        setNewMessage(messageText); // Restaurar mensagem
       }
-      
-      await apiService.sendWhatsAppMessage({
-        phoneNumber: selectedSession.phoneNumber,
-        message: newMessage,
-        messageType: 'text'
-      });
-      
-      // Adicionar mensagem localmente para feedback imediato
-      const newMsg: WhatsAppMessage = {
-        id: Date.now().toString(),
-        content: newMessage,
-        direction: 'outbound',
-        messageType: 'text',
-        createdAt: new Date().toISOString(),
-        status: 'sent'
-      };
-      setMessages(prev => [...prev, newMsg]);
-      
-      setNewMessage('');
-      
-      // Stop typing indicator
-      sendTypingIndicator(selectedSession.id, false);
-      
-      // Atualizar histórico após um breve delay
-      setTimeout(() => {
-        fetchConversationHistory(selectedSession.phoneNumber);
-      }, 1000);
     } catch (error) {
       console.error('Erro ao enviar mensagem:', error);
-      showError('Erro ao enviar', 'Não foi possível enviar a mensagem');
+      showError('Erro', 'Não foi possível enviar a mensagem');
+      setNewMessage(messageText); // Restaurar mensagem
     } finally {
       setSendingMessage(false);
-    }
-  };
-  
-  const handleTyping = (value: string) => {
-    setNewMessage(value);
-    
-    if (selectedSession) {
-      // Send typing indicator
-      sendTypingIndicator(selectedSession.id, value.length > 0);
     }
   };
 
   const assignAgent = async (sessionId: string, agentId: string) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/whatsapp/sessions/${sessionId}/assign`, {
+      const response = await apiService.request(`/whatsapp/sessions/${sessionId}/assign`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
         body: JSON.stringify({ agentId })
       });
-      
-      if (response.ok) {
-        fetchActiveSessions();
-        showSuccess('Agente atribuído!', 'Conversa atribuída com sucesso');
-      } else {
-        showError('Erro ao atribuir', 'Não foi possível atribuir o agente');
+
+      if (response.success) {
+        loadSessions(); // Recarregar sessões
+        showSuccess('Agente atribuído!', 'Agente atribuído à conversa com sucesso');
       }
     } catch (error) {
       console.error('Erro ao atribuir agente:', error);
-      showError('Erro de conexão', 'Não foi possível atribuir o agente');
+      showError('Erro', 'Não foi possível atribuir o agente');
     }
   };
 
-  const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString('pt-BR', {
+  const formatTime = (timestamp: string) => {
+    return new Date(timestamp).toLocaleTimeString('pt-BR', {
       hour: '2-digit',
       minute: '2-digit'
     });
   };
 
-  const formatResponseTime = (seconds: number) => {
-    if (seconds < 60) return `${Math.round(seconds)}s`;
-    if (seconds < 3600) return `${Math.round(seconds / 60)}min`;
-    return `${Math.round(seconds / 3600)}h`;
+  const formatDate = (timestamp: string) => {
+    return new Date(timestamp).toLocaleDateString('pt-BR');
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">WhatsApp Business</h1>
-          <p className="text-gray-600">Gerencie conversas e atendimentos em tempo real</p>
+          <p className="text-gray-600">Gerencie conversas do WhatsApp em tempo real</p>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Signal className={`h-4 w-4 ${isConnected ? 'text-green-600' : 'text-red-600'}`} />
-            <span className={`text-sm ${isConnected ? 'text-green-600' : 'text-red-600'}`}>
-              {isConnected ? 'Conectado' : 'Desconectado'}
-            </span>
+        <button
+          onClick={() => setShowConfig(true)}
+          className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+        >
+          <CogIcon className="w-5 h-5 mr-2" />
+          Configurar
+        </button>
+      </div>
+
+      {/* Configuration Warning */}
+      {(!process.env.WHATSAPP_ACCESS_TOKEN || !process.env.WHATSAPP_PHONE_NUMBER_ID) && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <div className="flex items-start">
+            <ExclamationTriangleIcon className="w-5 h-5 text-yellow-600 mr-2 mt-0.5" />
+            <div>
+              <h3 className="font-medium text-yellow-800">WhatsApp não configurado</h3>
+              <p className="text-sm text-yellow-700 mt-1">
+                Configure as credenciais do WhatsApp Business API para usar esta funcionalidade.
+                Clique em "Configurar" para adicionar suas credenciais.
+              </p>
+            </div>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-            <Settings className="h-4 w-4" />
-            Configurações
-          </button>
+        </div>
+      )}
+
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-white p-4 rounded-lg shadow-sm border">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Sessões Ativas</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {sessions.filter(s => s.status === 'active').length}
+              </p>
+            </div>
+            <DevicePhoneMobileIcon className="w-8 h-8 text-green-600" />
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-lg shadow-sm border">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Total de Sessões</p>
+              <p className="text-2xl font-bold text-gray-900">{sessions.length}</p>
+            </div>
+            <UserIcon className="w-8 h-8 text-blue-600" />
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-lg shadow-sm border">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Com Agente</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {sessions.filter(s => s.agent_id).length}
+              </p>
+            </div>
+            <CpuChipIcon className="w-8 h-8 text-purple-600" />
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-lg shadow-sm border">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Mensagens</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {sessions.reduce((sum, s) => sum + (s.message_count || 0), 0)}
+              </p>
+            </div>
+            <ClockIcon className="w-8 h-8 text-yellow-600" />
+          </div>
         </div>
       </div>
 
-      {/* Test Credentials Info */}
-      {localStorage.getItem('authToken') === 'demo-token' && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
-            <div className="flex-1">
-              <h3 className="font-medium text-blue-900 mb-2">Modo de Demonstração - WhatsApp</h3>
-              <div className="text-sm text-blue-800 space-y-1">
-                <p>• <strong>Sessões ativas:</strong> 4 sessões de teste com diferentes status</p>
-                <p>• <strong>Histórico:</strong> Conversas simuladas com clientes fictícios</p>
-                <p>• <strong>Envio de mensagens:</strong> Simula envio com resposta automática</p>
-                <p>• <strong>Estatísticas:</strong> Dados de exemplo para agentes e distribuição horária</p>
-                <p>• <strong>Tempo real:</strong> Funcionalidades Socket.IO simuladas</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Estatísticas */}
-      {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Sessões Ativas</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.overview.active_sessions}</p>
-              </div>
-              <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <Users className="h-6 w-6 text-green-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Mensagens (1h)</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.overview.messages_1h}</p>
-              </div>
-              <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <MessageCircle className="h-6 w-6 text-blue-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Tempo Resposta</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {formatResponseTime(stats.overview.avg_response_time)}
-                </p>
-              </div>
-              <div className="h-12 w-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <Clock className="h-6 w-6 text-yellow-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Satisfação</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.overview.satisfied_customers}</p>
-              </div>
-              <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <TrendingUp className="h-6 w-6 text-purple-600" />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Interface de Chat */}
+      {/* Main Interface */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Lista de Sessões */}
+        {/* Sessions List */}
         <div className="bg-white rounded-lg shadow-sm border">
           <div className="p-4 border-b">
-            <h3 className="font-semibold text-gray-900">Conversas Ativas</h3>
+            <h3 className="font-semibold text-gray-900">Sessões WhatsApp</h3>
             <p className="text-sm text-gray-600">{sessions.length} sessões</p>
           </div>
           <div className="max-h-96 overflow-y-auto">
-            {sessions.map((session) => (
-              <div
-                key={session.id}
-                className={`p-4 border-b cursor-pointer hover:bg-gray-50 ${
-                  selectedSession?.id === session.id ? 'bg-blue-50 border-blue-200' : ''
-                }`}
-                onClick={() => setSelectedSession(session)}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 bg-green-100 rounded-full flex items-center justify-center">
-                      <Phone className="h-5 w-5 text-green-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">
-                        {session.contactName || session.phoneNumber}
-                      </p>
-                      <p className="text-sm text-gray-600">{session.phoneNumber}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-gray-500">
-                      {formatTime(session.lastActivity)}
-                    </p>
-                    {session.stats.total_messages > 0 && (
-                      <p className="text-xs text-blue-600">
-                        {session.stats.total_messages} msgs
-                      </p>
-                    )}
-                  </div>
-                </div>
-                {session.agentName && (
-                  <p className="text-xs text-gray-500 mt-1">Agente: {session.agentName}</p>
-                )}
+            {loading ? (
+              <div className="p-8 text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
               </div>
-            ))}
-            {sessions.length === 0 && (
+            ) : sessions.length > 0 ? (
+              sessions.map((session) => (
+                <div
+                  key={session.id}
+                  className={`p-4 border-b cursor-pointer hover:bg-gray-50 ${
+                    selectedSession?.id === session.id ? 'bg-blue-50 border-blue-200' : ''
+                  }`}
+                  onClick={() => setSelectedSession(session)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                        <DevicePhoneMobileIcon className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">
+                          {session.contact_name || session.phone_number}
+                        </p>
+                        <p className="text-sm text-gray-600">{session.phone_number}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className={`w-2 h-2 rounded-full ${
+                        session.status === 'active' ? 'bg-green-400' : 'bg-gray-400'
+                      }`}></div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {formatTime(session.last_activity)}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {session.agent_name ? (
+                    <p className="text-xs text-blue-600 mt-2">Agente: {session.agent_name}</p>
+                  ) : (
+                    <div className="mt-2">
+                      <select
+                        onClick={(e) => e.stopPropagation()}
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            assignAgent(session.id, e.target.value);
+                          }
+                        }}
+                        className="text-xs border border-gray-300 rounded px-2 py-1"
+                      >
+                        <option value="">Atribuir agente...</option>
+                        {state.agents.filter(a => a.is_active).map(agent => (
+                          <option key={agent.id} value={agent.id}>{agent.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+              ))
+            ) : (
               <div className="p-8 text-center text-gray-500">
-                <MessageCircle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                <p>Nenhuma conversa ativa</p>
+                <DevicePhoneMobileIcon className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                <p>Nenhuma sessão WhatsApp</p>
+                <p className="text-sm mt-1">Configure o webhook para receber mensagens</p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Área de Chat */}
+        {/* Chat Area */}
         <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border flex flex-col">
           {selectedSession ? (
             <>
-              {/* Header do Chat */}
+              {/* Chat Header */}
               <div className="p-4 border-b flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 bg-green-100 rounded-full flex items-center justify-center">
-                    <Phone className="h-5 w-5 text-green-600" />
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                    <DevicePhoneMobileIcon className="w-5 h-5 text-green-600" />
                   </div>
                   <div>
                     <p className="font-medium text-gray-900">
-                      {selectedSession.contactName || selectedSession.phoneNumber}
+                      {selectedSession.contact_name || selectedSession.phone_number}
                     </p>
-                    <p className="text-sm text-gray-600">{selectedSession.phoneNumber}</p>
+                    <p className="text-sm text-gray-600">{selectedSession.phone_number}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                    {selectedSession.status === 'active' ? 'Ativo' : 'Encerrado'}
-                  </span>
+                <div className="flex items-center space-x-2">
+                  <div className={`w-2 h-2 rounded-full ${
+                    selectedSession.status === 'active' ? 'bg-green-400' : 'bg-gray-400'
+                  }`}></div>
+                  <span className="text-sm text-gray-600 capitalize">{selectedSession.status}</span>
                 </div>
               </div>
 
-              {/* Mensagens */}
-              <div className="flex-1 p-4 overflow-y-auto max-h-96">
+              {/* Messages */}
+              <div className="flex-1 p-4 overflow-y-auto max-h-96 space-y-4">
                 {messages.map((message) => (
                   <div
                     key={message.id}
-                    className={`mb-4 flex ${
-                      message.direction === 'outbound' ? 'justify-end' : 'justify-start'
-                    }`}
+                    className={`flex ${message.sender === 'user' ? 'justify-start' : 'justify-end'}`}
                   >
-                    <div
-                      className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                        message.direction === 'outbound'
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-gray-900'
-                      }`}
-                    >
-                      <p className="text-sm">{message.content}</p>
-                      <p
-                        className={`text-xs mt-1 ${
-                          message.direction === 'outbound'
-                            ? 'text-blue-100'
-                            : 'text-gray-500'
-                        }`}
-                      >
-                        {formatTime(message.createdAt)}
-                      </p>
+                    <div className={`flex items-start space-x-2 max-w-xs lg:max-w-md ${
+                      message.sender === 'user' ? '' : 'flex-row-reverse space-x-reverse'
+                    }`}>
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                        message.sender === 'user' ? 'bg-gray-600' : 'bg-green-600'
+                      }`}>
+                        {message.sender === 'user' ? (
+                          <UserIcon className="w-4 h-4 text-white" />
+                        ) : (
+                          <CpuChipIcon className="w-4 h-4 text-white" />
+                        )}
+                      </div>
+                      <div className={`px-4 py-2 rounded-lg ${
+                        message.sender === 'user'
+                          ? 'bg-gray-100 text-gray-900'
+                          : 'bg-green-600 text-white'
+                      }`}>
+                        <p className="text-sm">{message.content}</p>
+                        <p className={`text-xs mt-1 ${
+                          message.sender === 'user' ? 'text-gray-500' : 'text-green-100'
+                        }`}>
+                          {formatTime(message.timestamp)}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 ))}
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Input de Mensagem */}
+              {/* Message Input */}
               <div className="p-4 border-t">
-                <div className="flex gap-2">
+                <div className="flex space-x-2">
                   <input
                     type="text"
                     value={newMessage}
-                    onChange={(e) => handleTyping(e.target.value)}
+                    onChange={(e) => setNewMessage(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
                     placeholder="Digite sua mensagem..."
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     disabled={sendingMessage}
                   />
                   <button
                     onClick={sendMessage}
                     disabled={!newMessage.trim() || sendingMessage}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                   >
-                    <Send className="h-4 w-4" />
-                    {sendingMessage ? 'Enviando...' : 'Enviar'}
+                    {sendingMessage ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    ) : (
+                      <PaperAirplaneIcon className="w-4 h-4" />
+                    )}
                   </button>
                 </div>
               </div>
             </>
           ) : (
-            <div className="flex-1 flex items-center justify-center text-gray-500">
+            <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
-                <MessageCircle className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-                <p className="text-lg font-medium">Selecione uma conversa</p>
-                <p className="text-sm">Escolha uma conversa da lista para começar</p>
+                <DevicePhoneMobileIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Selecione uma Sessão</h3>
+                <p className="text-gray-500">Escolha uma sessão da lista para visualizar a conversa</p>
               </div>
             </div>
           )}
         </div>
       </div>
+
+      {/* Configuration Modal */}
+      {showConfig && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg max-w-md w-full m-4">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-gray-900">Configurar WhatsApp</h2>
+                <button
+                  onClick={() => setShowConfig(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Access Token
+                  </label>
+                  <input
+                    type="password"
+                    value={whatsappConfig.accessToken}
+                    onChange={(e) => setWhatsappConfig(prev => ({ ...prev, accessToken: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                    placeholder="Seu WhatsApp Access Token"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Phone Number ID
+                  </label>
+                  <input
+                    type="text"
+                    value={whatsappConfig.phoneNumberId}
+                    onChange={(e) => setWhatsappConfig(prev => ({ ...prev, phoneNumberId: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                    placeholder="ID do número de telefone"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Webhook Verify Token
+                  </label>
+                  <input
+                    type="text"
+                    value={whatsappConfig.webhookToken}
+                    onChange={(e) => setWhatsappConfig(prev => ({ ...prev, webhookToken: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                    placeholder="Token de verificação do webhook"
+                  />
+                </div>
+
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-medium text-blue-900 mb-2">Como configurar:</h4>
+                  <ol className="text-sm text-blue-800 space-y-1">
+                    <li>1. Acesse Facebook Developers</li>
+                    <li>2. Crie um app WhatsApp Business</li>
+                    <li>3. Configure o webhook: {window.location.origin}/api/whatsapp/webhook</li>
+                    <li>4. Copie o Access Token e Phone Number ID</li>
+                  </ol>
+                </div>
+
+                <div className="flex space-x-3">
+                  <button
+                    onClick={() => {
+                      // Salvar configurações no .env (em produção, usar interface admin)
+                      showInfo('Configuração', 'Adicione essas credenciais no arquivo .env do servidor');
+                      setShowConfig(false);
+                    }}
+                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                  >
+                    Salvar
+                  </button>
+                  <button
+                    onClick={() => setShowConfig(false)}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

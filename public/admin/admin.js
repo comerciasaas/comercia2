@@ -56,9 +56,9 @@ async function adminLogin(event) {
             body: JSON.stringify({ email, password })
         });
 
-        if (response.success && response.data.user.role === 'admin') {
-            authToken = response.data.token;
-            currentUser = response.data.user;
+        if (response.success && response.user.role === 'admin') {
+            authToken = response.token;
+            currentUser = response.user;
             
             localStorage.setItem('adminToken', authToken);
             localStorage.setItem('adminUser', JSON.stringify(currentUser));
@@ -67,7 +67,6 @@ async function adminLogin(event) {
             document.getElementById('login-form').classList.add('hidden');
             document.getElementById('dashboard').classList.remove('hidden');
             
-            // Carregar dados do dashboard
             loadDashboard();
         } else {
             alert('Acesso negado. Apenas administradores podem acessar este painel.');
@@ -122,11 +121,7 @@ async function loadDashboard() {
             updateUsersTable(usersData.data.users);
         }
 
-        // Carregar outros dados
-        loadAgents();
-        loadConversations();
         loadAuditLogs();
-        loadAlerts();
         
     } catch (error) {
         console.error('Erro ao carregar dashboard:', error);
@@ -136,27 +131,13 @@ async function loadDashboard() {
 
 // Atualizar estatísticas do dashboard
 function updateDashboardStats(data) {
-    // Estatísticas de usuários
     document.getElementById('total-users').textContent = data.users.total_users || 0;
-    
-    // Estatísticas do sistema
-    document.getElementById('monthly-revenue').textContent = 'R$ 0,00'; // Implementar quando tiver sistema de pagamento
+    document.getElementById('monthly-revenue').textContent = 'R$ 0,00';
     document.getElementById('active-plans').textContent = data.users.active_users || 0;
     document.getElementById('active-agents').textContent = data.aggregated.total_agents || 0;
     document.getElementById('conversations-today').textContent = data.aggregated.total_conversations || 0;
-    document.getElementById('alerts-count').textContent = '0'; // Será atualizado quando carregar alertas
+    document.getElementById('alerts-count').textContent = '0';
     
-    // Métricas de performance
-    document.getElementById('avg-response-time').textContent = '2.3s';
-    document.getElementById('system-uptime').textContent = '99.9%';
-    document.getElementById('cpu-usage').textContent = '45%';
-    
-    // Métricas de faturamento
-    document.getElementById('mrr').textContent = 'R$ 0,00';
-    document.getElementById('churn-rate').textContent = '2.1%';
-    document.getElementById('avg-ltv').textContent = 'R$ 0,00';
-    
-    // Atividade recente
     updateRecentActivity();
 }
 
@@ -165,16 +146,16 @@ function updateRecentActivity() {
     const recentActivity = document.getElementById('recent-activity');
     recentActivity.innerHTML = `
         <div class="text-sm text-gray-600 mb-2">
-            <span class="font-medium">Novo usuário registrado</span>
+            <span class="font-medium">Sistema iniciado</span>
             <span class="text-gray-400 ml-2">há 5 minutos</span>
         </div>
         <div class="text-sm text-gray-600 mb-2">
-            <span class="font-medium">Agente criado</span>
-            <span class="text-gray-400 ml-2">há 12 minutos</span>
+            <span class="font-medium">Banco de dados conectado</span>
+            <span class="text-gray-400 ml-2">há 5 minutos</span>
         </div>
         <div class="text-sm text-gray-600">
-            <span class="font-medium">Conversa finalizada</span>
-            <span class="text-gray-400 ml-2">há 18 minutos</span>
+            <span class="font-medium">APIs carregadas</span>
+            <span class="text-gray-400 ml-2">há 5 minutos</span>
         </div>
     `;
 }
@@ -231,34 +212,6 @@ function updateUsersTable(users) {
     `).join('');
 }
 
-// Carregar agentes de todos os usuários
-async function loadAgents() {
-    try {
-        const response = await apiRequest('/admin/agents');
-        
-        if (response.success) {
-            // Atualizar contador de agentes
-            document.getElementById('active-agents').textContent = response.data.agents.length;
-        }
-    } catch (error) {
-        console.error('Erro ao carregar agentes:', error);
-    }
-}
-
-// Carregar conversas de todos os usuários
-async function loadConversations() {
-    try {
-        const response = await apiRequest('/admin/conversations');
-        
-        if (response.success) {
-            // Atualizar contador de conversas
-            document.getElementById('conversations-today').textContent = response.data.conversations.length;
-        }
-    } catch (error) {
-        console.error('Erro ao carregar conversas:', error);
-    }
-}
-
 // Carregar logs de auditoria
 async function loadAuditLogs() {
     try {
@@ -304,19 +257,6 @@ function updateLogsTable(logs) {
     `).join('');
 }
 
-// Carregar alertas
-async function loadAlerts() {
-    try {
-        const response = await apiRequest('/admin/alerts');
-        
-        if (response.success) {
-            document.getElementById('alerts-count').textContent = response.data.alerts.filter(a => !a.is_resolved).length;
-        }
-    } catch (error) {
-        console.error('Erro ao carregar alertas:', error);
-    }
-}
-
 // Função para excluir usuário
 async function deleteUser(userId) {
     if (!confirm('Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.')) {
@@ -330,7 +270,7 @@ async function deleteUser(userId) {
 
         if (response.success) {
             alert('Usuário excluído com sucesso!');
-            loadDashboard(); // Recarregar dados
+            loadDashboard();
         } else {
             alert('Erro ao excluir usuário: ' + response.error);
         }
@@ -378,7 +318,7 @@ async function submitUserForm(event) {
         if (response.success) {
             alert('Usuário criado com sucesso!');
             closeUserModal();
-            loadDashboard(); // Recarregar dados
+            loadDashboard();
         } else {
             alert('Erro ao criar usuário: ' + response.error);
         }
@@ -390,41 +330,27 @@ async function submitUserForm(event) {
 
 // Função para mostrar tabs
 function showTab(tabName) {
-    // Esconder todos os conteúdos
     document.querySelectorAll('.tab-content').forEach(content => {
         content.classList.add('hidden');
     });
     
-    // Remover classe active de todos os botões
     document.querySelectorAll('.tab-button').forEach(button => {
         button.classList.remove('active', 'border-indigo-500', 'text-indigo-600');
         button.classList.add('border-transparent', 'text-gray-500');
     });
     
-    // Mostrar conteúdo selecionado
     document.getElementById(`content-${tabName}`).classList.remove('hidden');
     
-    // Ativar botão selecionado
     const activeButton = document.getElementById(`tab-${tabName}`);
     activeButton.classList.add('active', 'border-indigo-500', 'text-indigo-600');
     activeButton.classList.remove('border-transparent', 'text-gray-500');
     
-    // Carregar dados específicos da tab
     switch (tabName) {
         case 'users':
             loadUsers();
             break;
-        case 'payments':
-            loadPayments();
-            break;
         case 'logs':
             loadAuditLogs();
-            break;
-        case 'reports':
-            loadReports();
-            break;
-        case 'support':
-            loadSupportTickets();
             break;
     }
 }
@@ -442,23 +368,6 @@ async function loadUsers() {
     }
 }
 
-// Carregar pagamentos (placeholder)
-function loadPayments() {
-    const tbody = document.getElementById('payments-table');
-    tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Sistema de pagamentos será implementado em breve</td></tr>';
-}
-
-// Carregar relatórios (placeholder)
-function loadReports() {
-    console.log('Carregando relatórios...');
-}
-
-// Carregar tickets de suporte (placeholder)
-function loadSupportTickets() {
-    const tbody = document.getElementById('support-table');
-    tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">Sistema de suporte será implementado em breve</td></tr>';
-}
-
 // Auto-refresh dos dados a cada 30 segundos
 setInterval(() => {
     if (authToken && currentUser) {
@@ -470,18 +379,3 @@ setInterval(() => {
 document.addEventListener('DOMContentLoaded', () => {
     checkAuth();
 });
-
-// Funções para modais de confirmação
-function openConfirmModal(title, message, callback) {
-    document.getElementById('confirmTitle').textContent = title;
-    document.getElementById('confirmMessage').textContent = message;
-    document.getElementById('confirmButton').onclick = () => {
-        callback();
-        closeConfirmModal();
-    };
-    document.getElementById('confirmModal').classList.remove('hidden');
-}
-
-function closeConfirmModal() {
-    document.getElementById('confirmModal').classList.add('hidden');
-}

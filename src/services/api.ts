@@ -14,7 +14,7 @@ class ApiService {
     this.token = localStorage.getItem('token');
   }
 
-  private async request<T = any>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
+  async request<T = any>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
     const url = `${API_BASE_URL}${endpoint}`;
     
     const config: RequestInit = {
@@ -55,10 +55,10 @@ class ApiService {
       body: JSON.stringify({ email, password }),
     });
     
-    if (data.success && data.data?.token) {
-      this.token = data.data.token;
-      localStorage.setItem('token', data.data.token);
-      localStorage.setItem('user', JSON.stringify(data.data.user));
+    if (data.success && data.token) {
+      this.token = data.token;
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
     }
     
     return data;
@@ -70,10 +70,10 @@ class ApiService {
       body: JSON.stringify(userData),
     });
     
-    if (data.success && data.data?.token) {
-      this.token = data.data.token;
-      localStorage.setItem('token', data.data.token);
-      localStorage.setItem('user', JSON.stringify(data.data.user));
+    if (data.success && data.token) {
+      this.token = data.token;
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
     }
     
     return data;
@@ -144,7 +144,7 @@ class ApiService {
     return this.request('/conversations/stats');
   }
 
-  // Admin methods (apenas para admins)
+  // Admin methods
   async getDashboardStats(): Promise<ApiResponse> {
     return this.request('/admin/dashboard');
   }
@@ -176,52 +176,6 @@ class ApiService {
     return this.request(`/admin/users/${id}`, {
       method: 'DELETE',
     });
-  }
-
-  async getAllAgents(filters: any = {}): Promise<ApiResponse> {
-    const queryParams = new URLSearchParams();
-    Object.keys(filters).forEach(key => {
-      if (filters[key]) queryParams.append(key, filters[key]);
-    });
-    
-    return this.request(`/admin/agents?${queryParams}`);
-  }
-
-  async getAllConversations(filters: any = {}): Promise<ApiResponse> {
-    const queryParams = new URLSearchParams();
-    Object.keys(filters).forEach(key => {
-      if (filters[key]) queryParams.append(key, filters[key]);
-    });
-    
-    return this.request(`/admin/conversations?${queryParams}`);
-  }
-
-  async getAuditLogs(filters: any = {}): Promise<ApiResponse> {
-    const queryParams = new URLSearchParams();
-    Object.keys(filters).forEach(key => {
-      if (filters[key]) queryParams.append(key, filters[key]);
-    });
-    
-    return this.request(`/admin/audit-logs?${queryParams}`);
-  }
-
-  async getAlerts(filters: any = {}): Promise<ApiResponse> {
-    const queryParams = new URLSearchParams();
-    Object.keys(filters).forEach(key => {
-      if (filters[key]) queryParams.append(key, filters[key]);
-    });
-    
-    return this.request(`/admin/alerts?${queryParams}`);
-  }
-
-  async resolveAlert(id: string): Promise<ApiResponse> {
-    return this.request(`/admin/alerts/${id}/resolve`, {
-      method: 'PUT',
-    });
-  }
-
-  async getSystemHealth(): Promise<ApiResponse> {
-    return this.request('/admin/system/health');
   }
 
   // Utility methods
